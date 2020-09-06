@@ -1,39 +1,35 @@
 package clamav
 
 import (
-	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
-	"io/ioutil"
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/cfg"
 	"strings"
 )
 
-type PrometheusCollector struct {
-	status *prometheus.Desc
+type Collector struct {
+	config      cfg.Config
+	status      *prometheus.Desc
+	threadsLive *prometheus.Desc
 }
 
-func NewPrometheusCollector() *PrometheusCollector {
-	return &PrometheusCollector{
-		status: prometheus.NewDesc("clamav_status",
-			"Shows UP Status",
-			nil, nil,
-		),
+func NewCollector(config cfg.Config) *Collector {
+	return &Collector{
+		config:      config,
+		status:      prometheus.NewDesc("clamav_status", "Shows UP Status", nil, nil),
+		threadsLive: prometheus.NewDesc("clamav_threads_live", "Shows live threads", nil, nil),
 	}
 }
 
-func (collector *PrometheusCollector) Describe(ch chan<- *prometheus.Desc) {
+func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.status
 }
 
-func (collector *PrometheusCollector) Collect(ch chan<- prometheus.Metric) {
-	conn := NewTCPClient("localhost", 3310)
-	defer conn.Close()
+func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
+	address := collector.config.ClamAVAddress
+	port := collector.config.ClamAVPort
 
-	conn.Write([]byte(fmt.Sprintf("%s", commands.PING)))
-	resp, _ := ioutil.ReadAll(conn)
-	if strings.TrimSpace(string(resp)) == "PONG" {
+	ping := ping(address, port)
+	if strings.TrimSpace(string(ping)) == "PONG" {
 		ch <- prometheus.MustNewConstMetric(collector.status, prometheus.CounterValue, 1)
-	} else {
-		ch <- prometheus.MustNewConstMetric(collector.status, prometheus.CounterValue, 0)
 	}
 }
