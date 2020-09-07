@@ -17,5 +17,5 @@ func (c Command) String() string {
 	if c.Prefix == "n" {
 		return fmt.Sprintf("%s%s\n", c.Prefix, c.Name)
 	}
-	return c.Prefix + c.Name
+	return c.Prefix + c.Name + "\n"
 }
