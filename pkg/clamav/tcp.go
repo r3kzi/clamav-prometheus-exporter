@@ -12,7 +12,7 @@ import (
 
 var (
 	//THREADS: live 1  idle 0 max 12
-	threadsRegex = regexp.MustCompile("(live)+\\s*([0-9])\\s*(idle)\\s*([0-9])\\s*(max)\\s*([0-9]*)")
+	threadsRegex = regexp.MustCompile("(live)+\\s*([0-9]+)\\s*(idle)\\s*([0-9]+)\\s*(max)\\s*([0-9]+)")
 )
 
 type Stats struct {
