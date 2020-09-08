@@ -35,3 +35,7 @@ clamav_threads_live 1
 # TYPE clamav_threads_max counter
 clamav_threads_max 12
 ```
+
+## Contributing
+
+Pull requests are welcome.
