@@ -2,6 +2,9 @@
 
 # ClamAV Prometheus Exporter
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/r3kzi/clamav-prometheus-exporter)](https://goreportcard.com/report/github.com/r3kzi/clamav-prometheus-exporter)
+[![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/r3kzi/clamav-prometheus-exporter/blob/master/LICENSE)
+
 ## Currently exposed metrics
 
 - ClamAVStatus
