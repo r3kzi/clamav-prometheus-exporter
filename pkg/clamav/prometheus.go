@@ -9,6 +9,7 @@ import (
 	"regexp"
 )
 
+//Collector satisfies prometheus.Collector interface
 type Collector struct {
 	config      cfg.Config
 	status      *prometheus.Desc
@@ -24,6 +25,7 @@ var (
 	regex = regexp.MustCompile("(live|idle|max|heap|mmap|\\bused)\\s([0-9.]+)[MG]*")
 )
 
+//NewCollector creates a Collector struct based on cfg.Config
 func NewCollector(config cfg.Config) *Collector {
 	return &Collector{
 		config:      config,
@@ -37,10 +39,12 @@ func NewCollector(config cfg.Config) *Collector {
 	}
 }
 
+//Describe satisfies prometheus.Collector.Describe
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.status
 }
 
+//Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	address := fmt.Sprintf("%s:%d", collector.config.ClamAVAddress, collector.config.ClamAVPort)
 
