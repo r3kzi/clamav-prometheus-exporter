@@ -16,10 +16,10 @@ package collector
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	"log"
 	"regexp"
 	"strconv"
 )
@@ -75,7 +75,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	float := func(s string) float64 {
 		float, err := strconv.ParseFloat(s, 64)
 		if err != nil {
-			_ = fmt.Errorf("couldn't parse string to float: %s", err)
+			log.Fatalf("couldn't parse string to float: %s", err)
 		}
 		return float
 	}

@@ -22,19 +22,23 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/collector"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
 
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+}
+
 func main() {
 	address := flag.String("clamav-address", "localhost", "ClamAV address to use")
 	port := flag.Int("clamav-port", 3310, "ClamAV port to use")
 	flag.Parse()
 
-	fmt.Println("Server is starting...")
+	log.Info("Server is starting...")
 
 	client := clamav.New(fmt.Sprintf("%s:%d", *address, *port))
 	coll := collector.New(*client)
@@ -58,7 +62,7 @@ func main() {
 
 	go func() {
 		<-quit
-		fmt.Println("Server is shutting down...")
+		log.Info("Server is shutting down...")
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -69,11 +73,11 @@ func main() {
 		close(done)
 	}()
 
-	fmt.Println("Server is ready to handle requests at :", 8080)
+	log.Info("Server is ready to handle requests at :", 8080)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Could not listen on %d: %v\n", 8080, err)
 	}
 
 	<-done
-	fmt.Println("Server stopped")
+	log.Info("Server stopped")
 }

@@ -17,6 +17,7 @@ package clamav
 import (
 	"fmt"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net"
 )
@@ -37,7 +38,7 @@ func New(address string) *Client {
 func (c Client) Dial(command commands.Command) []byte {
 	conn, err := net.Dial("tcp", c.address)
 	if err != nil {
-		_ = fmt.Errorf("error creating tcp connection for command %s: %s", command, err)
+		log.Fatalf("error creating tcp connection for command %s: %s", command, err)
 		return nil
 	}
 	defer conn.Close()
@@ -45,7 +46,7 @@ func (c Client) Dial(command commands.Command) []byte {
 	conn.Write([]byte(fmt.Sprintf("%s", command)))
 	resp, err := ioutil.ReadAll(conn)
 	if err != nil {
-		_ = fmt.Errorf("error reading tcp response for command %s: %s", command, err)
+		log.Fatalf("error reading tcp response for command %s: %s", command, err)
 		return nil
 	}
 	return resp
