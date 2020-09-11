@@ -57,6 +57,12 @@ func New(client clamav.Client) *Collector {
 //Describe satisfies prometheus.Collector.Describe
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.up
+	ch <- collector.threadsLive
+	ch <- collector.threadsIdle
+	ch <- collector.threadsMax
+	ch <- collector.memHeap
+	ch <- collector.memMmap
+	ch <- collector.memUsed
 }
 
 //Collect satisfies prometheus.Collector.Collect
