@@ -27,9 +27,9 @@ clamav_mem_mmap 0.129
 # HELP clamav_mem_used Shows used memory usage
 # TYPE clamav_mem_used gauge
 clamav_mem_used 3.237
-# HELP clamav_status Shows UP Status
-# TYPE clamav_status counter
-clamav_status 1
+# HELP clamav_up Shows UP Status
+# TYPE clamav_up counter
+clamav_up 1
 # HELP clamav_threads_idle Shows idle threads
 # TYPE clamav_threads_idle counter
 clamav_threads_idle 0
