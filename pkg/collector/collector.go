@@ -27,7 +27,7 @@ import (
 //Collector satisfies prometheus.Collector interface
 type Collector struct {
 	client      clamav.Client
-	status      *prometheus.Desc
+	up          *prometheus.Desc
 	threadsLive *prometheus.Desc
 	threadsIdle *prometheus.Desc
 	threadsMax  *prometheus.Desc
@@ -44,7 +44,7 @@ var (
 func New(client clamav.Client) *Collector {
 	return &Collector{
 		client:      client,
-		status:      prometheus.NewDesc("clamav_status", "Shows UP Status", nil, nil),
+		up:          prometheus.NewDesc("clamav_up", "Shows UP Status", nil, nil),
 		threadsLive: prometheus.NewDesc("clamav_threads_live", "Shows live threads", nil, nil),
 		threadsIdle: prometheus.NewDesc("clamav_threads_idle", "Shows idle threads", nil, nil),
 		threadsMax:  prometheus.NewDesc("clamav_threads_max", "Shows max threads", nil, nil),
@@ -56,14 +56,14 @@ func New(client clamav.Client) *Collector {
 
 //Describe satisfies prometheus.Collector.Describe
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- collector.status
+	ch <- collector.up
 }
 
 //Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	pong := collector.client.Dial(commands.PING)
 	if bytes.Compare(pong, []byte{'P', 'O', 'N', 'G', '\n'}) == 0 {
-		ch <- prometheus.MustNewConstMetric(collector.status, prometheus.CounterValue, 1)
+		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.CounterValue, 1)
 	}
 
 	float := func(s string) float64 {

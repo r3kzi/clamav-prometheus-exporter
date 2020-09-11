@@ -9,7 +9,7 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 
 ## Currently exposed metrics
 
-- ClamAVStatus
+- ClamAVUp
 - ClamAVThreadsLive
 - ClamAVThreadsIdle
 - ClamAVThreadsMax
