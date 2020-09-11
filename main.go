@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/cfg"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/collector"
 	"log"
 	"net/http"
 	"os"
@@ -30,16 +30,17 @@ import (
 )
 
 func main() {
-	config := &cfg.Config{}
-	flag.StringVar(&config.ClamAVAddress, "clamav-address", "localhost", "ClamAV address to use")
-	flag.IntVar(&config.ClamAVPort, "clamav-port", 3310, "ClamAV port to use")
+	address := flag.String("clamav-address", "localhost", "ClamAV address to use")
+	port := flag.Int("clamav-port", 3310, "ClamAV port to use")
 	flag.Parse()
 
 	fmt.Println("Server is starting...")
 
-	router := http.NewServeMux()
+	client := clamav.New(fmt.Sprintf("%s:%d", *address, *port))
+	coll := collector.New(*client)
+	prometheus.MustRegister(coll)
 
-	prometheus.MustRegister(clamav.NewCollector(*config))
+	router := http.NewServeMux()
 	router.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{

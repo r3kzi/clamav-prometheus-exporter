@@ -46,7 +46,8 @@ func TestPing(t *testing.T) {
 			t.Errorf("failed to write response: %s", err)
 		}
 	}()
-	assert.Equal(t, []byte{'P', 'O', 'N', 'G', '\n'}, dial(listener.Addr().String(), commands.PING))
+	client := New(listener.Addr().String())
+	assert.Equal(t, []byte{'P', 'O', 'N', 'G', '\n'}, client.Dial(commands.PING))
 }
 
 func TestStats(t *testing.T) {
@@ -74,9 +75,12 @@ func TestStats(t *testing.T) {
 			t.Errorf("failed to write response: %s", err)
 		}
 	}()
-	stats := dial(listener.Addr().String(), commands.STATS)
-	regex = regexp.MustCompile("(live|idle|max|heap|mmap|\\bused)\\s([0-9.]+)[MG]*")
+	client := New(listener.Addr().String())
+	stats := client.Dial(commands.STATS)
+
+	regex := regexp.MustCompile("(live|idle|max|heap|mmap|\\bused)\\s([0-9.]+)[MG]*")
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
+
 	assert.Equal(t, "1", matches[0][2])
 	assert.Equal(t, "0", matches[1][2])
 	assert.Equal(t, "12", matches[2][2])

@@ -12,20 +12,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package clamav
+package collector
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/cfg"
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
 	"regexp"
+	"strconv"
 )
 
 //Collector satisfies prometheus.Collector interface
 type Collector struct {
-	config      cfg.Config
+	client      clamav.Client
 	status      *prometheus.Desc
 	threadsLive *prometheus.Desc
 	threadsIdle *prometheus.Desc
@@ -39,10 +40,10 @@ var (
 	regex = regexp.MustCompile("(live|idle|max|heap|mmap|\\bused)\\s([0-9.]+)[MG]*")
 )
 
-//NewCollector creates a Collector struct based on cfg.Config
-func NewCollector(config cfg.Config) *Collector {
+//New creates a Collector struct
+func New(client clamav.Client) *Collector {
 	return &Collector{
-		config:      config,
+		client:      client,
 		status:      prometheus.NewDesc("clamav_status", "Shows UP Status", nil, nil),
 		threadsLive: prometheus.NewDesc("clamav_threads_live", "Shows live threads", nil, nil),
 		threadsIdle: prometheus.NewDesc("clamav_threads_idle", "Shows idle threads", nil, nil),
@@ -60,21 +61,27 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 
 //Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
-	address := fmt.Sprintf("%s:%d", collector.config.ClamAVAddress, collector.config.ClamAVPort)
-
-	pong := dial(address, commands.PING)
+	pong := collector.client.Dial(commands.PING)
 	if bytes.Compare(pong, []byte{'P', 'O', 'N', 'G', '\n'}) == 0 {
 		ch <- prometheus.MustNewConstMetric(collector.status, prometheus.CounterValue, 1)
 	}
 
-	stats := dial(address, commands.STATS)
+	float := func(s string) float64 {
+		float, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			_ = fmt.Errorf("couldn't parse string to float: %s", err)
+		}
+		return float
+	}
+
+	stats := collector.client.Dial(commands.STATS)
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
 	if len(matches) > 0 {
-		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.CounterValue, toFloat(matches[0][2]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.CounterValue, toFloat(matches[1][2]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.CounterValue, toFloat(matches[2][2]))
-		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, toFloat(matches[3][2]))
-		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, toFloat(matches[4][2]))
-		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, toFloat(matches[5][2]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.CounterValue, float(matches[0][2]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.CounterValue, float(matches[1][2]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.CounterValue, float(matches[2][2]))
+		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[3][2]))
+		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[4][2]))
+		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[5][2]))
 	}
 }

@@ -21,8 +21,21 @@ import (
 	"net"
 )
 
-func dial(address string, command commands.Command) []byte {
-	conn, err := net.Dial("tcp", address)
+//Client corresponds to a ClamAV client
+type Client struct {
+	address string
+}
+
+//New create a new TCP Client for ClamAV
+func New(address string) *Client {
+	return &Client{
+		address: address,
+	}
+}
+
+// Dial connects to a tcp socket based on address. Sends commands.Command.
+func (c Client) Dial(command commands.Command) []byte {
+	conn, err := net.Dial("tcp", c.address)
 	if err != nil {
 		_ = fmt.Errorf("error creating tcp connection for command %s: %s", command, err)
 		return nil
