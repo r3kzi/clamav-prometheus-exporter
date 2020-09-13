@@ -58,6 +58,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.threadsLive
 	ch <- collector.threadsIdle
 	ch <- collector.threadsMax
+	ch <- collector.queue
 	ch <- collector.memHeap
 	ch <- collector.memMmap
 	ch <- collector.memUsed
