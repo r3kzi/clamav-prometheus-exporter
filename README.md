@@ -13,11 +13,12 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 - ClamAVThreadsLive
 - ClamAVThreadsIdle
 - ClamAVThreadsMax
+- ClamAVQueue
 - ClamAVMemHeap
 - ClamAVMemMMap
 - ClamAVMemUsed
 
-``` 
+```
 # HELP clamav_mem_heap Shows heap memory usage
 # TYPE clamav_mem_heap gauge
 clamav_mem_heap 3.656
@@ -26,10 +27,10 @@ clamav_mem_heap 3.656
 clamav_mem_mmap 0.129
 # HELP clamav_mem_used Shows used memory usage
 # TYPE clamav_mem_used gauge
-clamav_mem_used 3.237
-# HELP clamav_up Shows UP Status
-# TYPE clamav_up counter
-clamav_up 1
+clamav_mem_used 3.236
+# HELP clamav_queue Shows queued items
+# TYPE clamav_queue counter
+clamav_queue 0
 # HELP clamav_threads_idle Shows idle threads
 # TYPE clamav_threads_idle counter
 clamav_threads_idle 0
@@ -39,6 +40,9 @@ clamav_threads_live 1
 # HELP clamav_threads_max Shows max threads
 # TYPE clamav_threads_max counter
 clamav_threads_max 12
+# HELP clamav_up Shows UP Status
+# TYPE clamav_up counter
+clamav_up 1 
 ```
 
 ## Installation

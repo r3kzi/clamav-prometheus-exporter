@@ -69,8 +69,13 @@ func TestStats(t *testing.T) {
 		}
 		assert.Equal(t, "nSTATS", strings.TrimSpace(string(resp)), "unexpected command")
 
-		write := "THREADS: live 1  idle 0 max 12\n" +
-			"MEMSTATS: heap 3.656M mmap 0.129M used 3.236M free 0.420M releasable 0.127M pools 1 pools_used 1089.550M pools_total 1089.585M\n"
+		write := "POOLS: 1\n\n" +
+			"STATE: VALID PRIMARY\n" +
+			"THREADS: live 1  idle 0 max 12 idle-timeout 30\n" +
+			"QUEUE: 0 items\n\t" +
+			"STATS 0.000146 \n\n" +
+			"MEMSTATS: heap 3.656M mmap 0.129M used 3.236M free 0.420M releasable 0.127M pools 1 pools_used 1089.550M pools_total 1089.585M\n" +
+			"END"
 		if _, err = server.Write([]byte(write)); err != nil {
 			t.Errorf("failed to write response: %s", err)
 		}
@@ -78,13 +83,15 @@ func TestStats(t *testing.T) {
 	client := New(listener.Addr().String())
 	stats := client.Dial(commands.STATS)
 
-	regex := regexp.MustCompile("(live|idle|max|heap|mmap|\\bused)\\s([0-9.]+)[MG]*")
+	regex := regexp.MustCompile("([0-9.]+)")
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
 
-	assert.Equal(t, "1", matches[0][2])
-	assert.Equal(t, "0", matches[1][2])
-	assert.Equal(t, "12", matches[2][2])
-	assert.Equal(t, "3.656", matches[3][2])
-	assert.Equal(t, "0.129", matches[4][2])
-	assert.Equal(t, "3.236", matches[5][2])
+	assert.Equal(t, "1", matches[1][1])
+	assert.Equal(t, "0", matches[2][1])
+	assert.Equal(t, "12", matches[3][1])
+	assert.Equal(t, "0", matches[5][1])
+	assert.Equal(t, "3.656", matches[7][1])
+	assert.Equal(t, "0.129", matches[8][1])
+	assert.Equal(t, "3.236", matches[9][1])
+
 }
