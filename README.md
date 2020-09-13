@@ -17,8 +17,12 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 - ClamAVMemHeap
 - ClamAVMemMMap
 - ClamAVMemUsed
+- ClamAVBuildInfo
 
 ```
+# HELP clamav_build_info Shows ClamAV Build Info
+# TYPE clamav_build_info gauge
+clamav_build_info{clamav_version="0.102.4",database_version="25913"} 1
 # HELP clamav_mem_heap Shows heap memory usage
 # TYPE clamav_mem_heap gauge
 clamav_mem_heap 3.656

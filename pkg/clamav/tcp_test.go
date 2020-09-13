@@ -95,3 +95,37 @@ func TestStats(t *testing.T) {
 	assert.Equal(t, "3.236", matches[9][1])
 
 }
+
+func TestVersion(t *testing.T) {
+	listener, err := net.Listen("tcp", "[::]:0")
+	if err != nil {
+		t.Errorf("couldn't create tcp listener: %s", err)
+	}
+	defer listener.Close()
+
+	go func() {
+		server, err := listener.Accept()
+		defer server.Close()
+		if err != nil {
+			t.Errorf("failed to accept connect: %s", err)
+		}
+		resp, err := bufio.NewReader(server).ReadBytes('\n')
+		if err != nil {
+			t.Errorf("failed to read request: %s", err)
+		}
+		assert.Equal(t, "VERSION", strings.TrimSpace(string(resp)), "unexpected command")
+
+		write := "ClamAV 0.102.4/25913/Fri Aug 28 13:19:15 2020\n"
+		if _, err = server.Write([]byte(write)); err != nil {
+			t.Errorf("failed to write response: %s", err)
+		}
+	}()
+	client := New(listener.Addr().String())
+	stats := client.Dial(commands.VERSION)
+
+	regex := regexp.MustCompile("((ClamAV)+\\s([0-9.]*)/([0-9.]*))")
+	matches := regex.FindAllStringSubmatch(string(stats), -1)
+
+	assert.Equal(t, "0.102.4", matches[0][3])
+	assert.Equal(t, "25913", matches[0][4])
+}

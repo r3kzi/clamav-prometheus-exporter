@@ -29,6 +29,8 @@ var (
 	//STATS - It is mandatory to newline terminate this command, or prefix with n or z.
 	//Replies with statistics about the scan queue, contents of scan queue, and memory usage.
 	STATS = Command{Name: "STATS", Prefix: "n"}
+
+	VERSION = Command{Name: "VERSION", Prefix: ""}
 )
 
 func (c Command) String() string {

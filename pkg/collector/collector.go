@@ -35,6 +35,7 @@ type Collector struct {
 	memHeap     *prometheus.Desc
 	memMmap     *prometheus.Desc
 	memUsed     *prometheus.Desc
+	buildInfo   *prometheus.Desc
 }
 
 //New creates a Collector struct
@@ -49,6 +50,7 @@ func New(client clamav.Client) *Collector {
 		memHeap:     prometheus.NewDesc("clamav_mem_heap", "Shows heap memory usage", nil, nil),
 		memMmap:     prometheus.NewDesc("clamav_mem_mmap", "Shows mmap memory usage", nil, nil),
 		memUsed:     prometheus.NewDesc("clamav_mem_used", "Shows used memory usage", nil, nil),
+		buildInfo:   prometheus.NewDesc("clamav_build_info", "Shows ClamAV Build Info", []string{"clamav_version", "database_version"}, nil),
 	}
 }
 
@@ -62,6 +64,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.memHeap
 	ch <- collector.memMmap
 	ch <- collector.memUsed
+	ch <- collector.buildInfo
 }
 
 //Collect satisfies prometheus.Collector.Collect
@@ -91,4 +94,12 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[8][1]))
 		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[9][1]))
 	}
+
+	version := collector.client.Dial(commands.VERSION)
+	regex = regexp.MustCompile("((ClamAV)+\\s([0-9.]*)/([0-9.]*))")
+	matches = regex.FindAllStringSubmatch(string(version), -1)
+	if len(matches) > 0 {
+		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][3], matches[0][4])
+	}
+
 }
