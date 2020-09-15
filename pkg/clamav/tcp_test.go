@@ -16,21 +16,31 @@ package clamav
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
 	"github.com/stretchr/testify/assert"
 	"net"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
 )
 
-func TestPing(t *testing.T) {
-	listener, err := net.Listen("tcp", "[::]:0")
+var (
+	listener net.Listener
+	err      error
+)
+
+func TestMain(m *testing.M) {
+	listener, err = net.Listen("tcp", "[::]:0")
 	if err != nil {
-		t.Errorf("couldn't create tcp listener: %s", err)
+		_ = fmt.Errorf("couldn't create tcp listener: %s", err)
 	}
 	defer listener.Close()
+	os.Exit(m.Run())
+}
 
+func TestPing(t *testing.T) {
 	go func() {
 		server, err := listener.Accept()
 		defer server.Close()
@@ -51,12 +61,6 @@ func TestPing(t *testing.T) {
 }
 
 func TestStats(t *testing.T) {
-	listener, err := net.Listen("tcp", "[::]:0")
-	if err != nil {
-		t.Errorf("couldn't create tcp listener: %s", err)
-	}
-	defer listener.Close()
-
 	go func() {
 		server, err := listener.Accept()
 		defer server.Close()
@@ -97,12 +101,6 @@ func TestStats(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	listener, err := net.Listen("tcp", "[::]:0")
-	if err != nil {
-		t.Errorf("couldn't create tcp listener: %s", err)
-	}
-	defer listener.Close()
-
 	go func() {
 		server, err := listener.Accept()
 		defer server.Close()
