@@ -43,7 +43,7 @@ func (c Client) Dial(command commands.Command) []byte {
 	}
 	defer conn.Close()
 
-	conn.Write([]byte(fmt.Sprintf("%s", command)))
+	_, _ = conn.Write([]byte(fmt.Sprintf("%s", command)))
 	resp, err := ioutil.ReadAll(conn)
 	if err != nil {
 		log.Errorf("error reading tcp response for command %s: %s", command, err)
