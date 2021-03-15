@@ -82,7 +82,7 @@ Just scrape this, e.g.:
 scrape_configs:
   - job_name: 'clamav-prometheus-exporter'
     static_configs:
-      - targets: ['localhost:8080']
+      - targets: ['localhost:9090']
 ```
 
 ## Contributing

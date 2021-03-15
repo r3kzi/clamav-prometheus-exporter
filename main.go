@@ -18,15 +18,16 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/collector"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 func init() {
@@ -48,7 +49,7 @@ func main() {
 	router.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%v", 8080),
+		Addr:         fmt.Sprintf(":%v", 9090),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -73,9 +74,9 @@ func main() {
 		close(done)
 	}()
 
-	log.Info("Server is ready to handle requests at :", 8080)
+	log.Info("Server is ready to handle requests at :", 9090)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Could not listen on %d: %v\n", 8080, err)
+		log.Fatalf("Could not listen on %d: %v\n", 9090, err)
 	}
 
 	<-done
