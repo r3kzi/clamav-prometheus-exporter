@@ -17,4 +17,4 @@ scrape_configs:
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
     static_configs:
-      - targets: ['clamav-prometheus-exporter:9090']
+      - targets: ['clamav-prometheus-exporter:9810']

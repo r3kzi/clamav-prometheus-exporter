@@ -10,7 +10,7 @@ services:
     volumes:
       - ./prometheus/:/etc/prometheus/
     ports:
-      - 9090:9090
+      - 9810:9810
     links:
       - clamav-prometheus-exporter:clamav-prometheus-exporter
 

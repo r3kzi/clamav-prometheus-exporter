@@ -49,7 +49,7 @@ func main() {
 	router.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%v", 9090),
+		Addr:         fmt.Sprintf(":%v", 9810),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -74,9 +74,9 @@ func main() {
 		close(done)
 	}()
 
-	log.Info("Server is ready to handle requests at :", 9090)
+	log.Info("Server is ready to handle requests at :", 9810)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Could not listen on %d: %v\n", 9090, err)
+		log.Fatalf("Could not listen on %d: %v\n", 9810, err)
 	}
 
 	<-done

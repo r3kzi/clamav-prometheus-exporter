@@ -4,7 +4,7 @@ WORKDIR /go/src/github.com/rekzi/clamav-prometheus-exporter/
 COPY . .
 # CGO_ENABLED=0 to build a statically-linked executable
 
-ENV CGO_ENABLED=0 
+ENV CGO_ENABLED=0
 RUN go build -installsuffix 'static' -o clamav-prometheus-exporter .
 
 # Final stage: the running container.
@@ -20,5 +20,5 @@ RUN adduser -S -u 1000 prometheus \
 
 USER 1000
 # Default port for metrics exporters
-EXPOSE 9090
+EXPOSE 9810
 ENTRYPOINT [ "/bin/clamav-prometheus-exporter" ]

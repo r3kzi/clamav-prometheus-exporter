@@ -1,4 +1,4 @@
-<p align="left"><img src="https://storage.googleapis.com/gopherizeme.appspot.com/gophers/9e5f19f595edf1bb1a51cb49e4eac9f935c1ec18.png" alt="Logo" height="200"></p> 
+<p align="left"><img src="https://storage.googleapis.com/gopherizeme.appspot.com/gophers/9e5f19f595edf1bb1a51cb49e4eac9f935c1ec18.png" alt="Logo" height="200"></p>
 
 # ClamAV Prometheus Exporter
 
@@ -46,7 +46,7 @@ clamav_threads_live 1
 clamav_threads_max 12
 # HELP clamav_up Shows UP Status
 # TYPE clamav_up counter
-clamav_up 1 
+clamav_up 1
 ```
 
 ## Installation
@@ -58,7 +58,7 @@ ClamAV Prometheus Exporter requires a
 $ go get -u github.com/r3kzi/clamav-prometheus-exporter
 ```
 
-To find out where `clamav-prometheus-exporter` was installed you can run `$ go list -f {{.Target}} github.com/r3kzi/clamav-prometheus-exporter`. 
+To find out where `clamav-prometheus-exporter` was installed you can run `$ go list -f {{.Target}} github.com/r3kzi/clamav-prometheus-exporter`.
 
 For `clamav-prometheus-exporter` to be used globally add that directory to the `$PATH` environment setting.
 
@@ -82,7 +82,7 @@ Just scrape this, e.g.:
 scrape_configs:
   - job_name: 'clamav-prometheus-exporter'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:9810']
 ```
 
 ## Contributing
