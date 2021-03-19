@@ -36,6 +36,8 @@ type Collector struct {
 	memHeap     *prometheus.Desc
 	memMmap     *prometheus.Desc
 	memUsed     *prometheus.Desc
+	poolsUsed   *prometheus.Desc
+	poolsTotal  *prometheus.Desc
 	buildInfo   *prometheus.Desc
 }
 
@@ -50,7 +52,9 @@ func New(client clamav.Client) *Collector {
 		queue:       prometheus.NewDesc("clamav_queue_length", "Shows queued items", nil, nil),
 		memHeap:     prometheus.NewDesc("clamav_mem_heap_bytes", "Shows heap memory usage in bytes", nil, nil),
 		memMmap:     prometheus.NewDesc("clamav_mem_mmap_bytes", "Shows mmap memory usage in bytes", nil, nil),
-		memUsed:     prometheus.NewDesc("clamav_mem_used_bytes", "Shows used memory usage in bytes", nil, nil),
+		memUsed:     prometheus.NewDesc("clamav_mem_used_bytes", "Shows used memory in bytes", nil, nil),
+		poolsUsed:   prometheus.NewDesc("clamav_pools_used_bytes", "Shows memory used by memory pool allocator for the signature database in bytes", nil, nil),
+		poolsTotal:  prometheus.NewDesc("clamav_pools_total_bytes", "Shows total memory allocated by memory pool allocator for the signature database in bytes", nil, nil),
 		buildInfo:   prometheus.NewDesc("clamav_build_info", "Shows ClamAV Build Info", []string{"clamav_version", "database_version"}, nil),
 	}
 }
@@ -65,6 +69,8 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.memHeap
 	ch <- collector.memMmap
 	ch <- collector.memUsed
+	ch <- collector.poolsUsed
+	ch <- collector.poolsTotal
 	ch <- collector.buildInfo
 }
 
@@ -86,7 +92,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	stats := collector.client.Dial(commands.STATS)
-	regex := regexp.MustCompile("([0-9.]+)")
+	regex := regexp.MustCompile(`([0-9.]+|N/A)`)
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
 	if len(matches) > 0 {
 		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
@@ -96,6 +102,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[7][1])*1024)
 		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[8][1])*1024)
 		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[9][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.poolsUsed, prometheus.GaugeValue, float(matches[13][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.poolsTotal, prometheus.GaugeValue, float(matches[14][1])*1024)
 	}
 
 	version := collector.client.Dial(commands.VERSION)

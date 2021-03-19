@@ -29,9 +29,15 @@ clamav_mem_heap_bytes 1.090783104e+06
 # HELP clamav_mem_mmap_bytes Shows mmap memory usage in bytes
 # TYPE clamav_mem_mmap_bytes gauge
 clamav_mem_mmap_bytes 1.076747264e+06
-# HELP clamav_mem_used_bytes Shows used memory usage in bytes
+# HELP clamav_mem_used_bytes Shows used memory in bytes
 # TYPE clamav_mem_used_bytes gauge
 clamav_mem_used_bytes 1.076783104e+06
+# HELP clamav_pools_total_bytes Shows total memory allocated by memory pool allocator for the signature database in bytes
+# TYPE clamav_pools_total_bytes gauge
+clamav_pools_total_bytes 1.076783104e+06
+# HELP clamav_pools_used_bytes Shows memory used by memory pool allocator for the signature database in bytes
+# TYPE clamav_pools_used_bytes gauge
+clamav_pools_used_bytes 1.076747264e+06
 # HELP clamav_queue_length Shows queued items
 # TYPE clamav_queue_length gauge
 clamav_queue_length 0
