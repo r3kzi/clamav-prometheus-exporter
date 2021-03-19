@@ -17,13 +17,14 @@ package clamav
 import (
 	"bufio"
 	"fmt"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
-	"github.com/stretchr/testify/assert"
 	"net"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	"github.com/stretchr/testify/assert"
 )
 
 var (

@@ -16,7 +16,7 @@ package collector
 
 import (
 	"bytes"
-	"log"
+	"math"
 	"regexp"
 	"strconv"
 
@@ -73,12 +73,14 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	pong := collector.client.Dial(commands.PING)
 	if bytes.Compare(pong, []byte{'P', 'O', 'N', 'G', '\n'}) == 0 {
 		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.CounterValue, 1)
+	} else {
+		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.CounterValue, 0)
 	}
 
 	float := func(s string) float64 {
 		float, err := strconv.ParseFloat(s, 64)
 		if err != nil {
-			log.Fatalf("couldn't parse string to float: %s", err)
+			float = math.NaN()
 		}
 		return float
 	}

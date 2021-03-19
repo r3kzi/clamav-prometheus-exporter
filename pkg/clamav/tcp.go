@@ -16,10 +16,11 @@ package clamav
 
 import (
 	"fmt"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net"
+
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	log "github.com/sirupsen/logrus"
 )
 
 //Client corresponds to a ClamAV client
