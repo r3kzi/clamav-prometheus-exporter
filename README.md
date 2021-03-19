@@ -22,30 +22,30 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 ```
 # HELP clamav_build_info Shows ClamAV Build Info
 # TYPE clamav_build_info gauge
-clamav_build_info{clamav_version="0.102.4",database_version="25913"} 1
-# HELP clamav_mem_heap Shows heap memory usage
-# TYPE clamav_mem_heap gauge
-clamav_mem_heap 3.656
-# HELP clamav_mem_mmap Shows mmap memory usage
-# TYPE clamav_mem_mmap gauge
-clamav_mem_mmap 0.129
-# HELP clamav_mem_used Shows used memory usage
-# TYPE clamav_mem_used gauge
-clamav_mem_used 3.236
-# HELP clamav_queue Shows queued items
-# TYPE clamav_queue counter
-clamav_queue 0
+clamav_build_info{clamav_version="0.102.4",database_version="26091"} 1
+# HELP clamav_mem_heap_bytes Shows heap memory usage in bytes
+# TYPE clamav_mem_heap_bytes gauge
+clamav_mem_heap_bytes 1.090783104e+06
+# HELP clamav_mem_mmap_bytes Shows mmap memory usage in bytes
+# TYPE clamav_mem_mmap_bytes gauge
+clamav_mem_mmap_bytes 1.076747264e+06
+# HELP clamav_mem_used_bytes Shows used memory usage in bytes
+# TYPE clamav_mem_used_bytes gauge
+clamav_mem_used_bytes 1.076783104e+06
+# HELP clamav_queue_length Shows queued items
+# TYPE clamav_queue_length gauge
+clamav_queue_length 0
 # HELP clamav_threads_idle Shows idle threads
-# TYPE clamav_threads_idle counter
+# TYPE clamav_threads_idle gauge
 clamav_threads_idle 0
 # HELP clamav_threads_live Shows live threads
-# TYPE clamav_threads_live counter
+# TYPE clamav_threads_live gauge
 clamav_threads_live 1
 # HELP clamav_threads_max Shows max threads
-# TYPE clamav_threads_max counter
-clamav_threads_max 12
+# TYPE clamav_threads_max gauge
+clamav_threads_max 10
 # HELP clamav_up Shows UP Status
-# TYPE clamav_up counter
+# TYPE clamav_up gauge
 clamav_up 1
 ```
 

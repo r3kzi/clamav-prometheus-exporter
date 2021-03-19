@@ -71,10 +71,10 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 //Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	pong := collector.client.Dial(commands.PING)
-	if bytes.Compare(pong, []byte{'P', 'O', 'N', 'G', '\n'}) == 0 {
-		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.CounterValue, 1)
+	if bytes.Equal(pong, []byte{'P', 'O', 'N', 'G', '\n'}) {
+		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.GaugeValue, 1)
 	} else {
-		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.CounterValue, 0)
+		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.GaugeValue, 0)
 	}
 
 	float := func(s string) float64 {
@@ -89,17 +89,17 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	regex := regexp.MustCompile("([0-9.]+)")
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
 	if len(matches) > 0 {
-		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.CounterValue, float(matches[1][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.CounterValue, float(matches[2][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.CounterValue, float(matches[3][1]))
-		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.CounterValue, float(matches[5][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
+		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.GaugeValue, float(matches[5][1]))
 		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[7][1])*1024)
 		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[8][1])*1024)
 		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[9][1])*1024)
 	}
 
 	version := collector.client.Dial(commands.VERSION)
-	regex = regexp.MustCompile("((ClamAV)+\\s([0-9.]*)/([0-9.]*))")
+	regex = regexp.MustCompile(`((ClamAV)+\s([0-9.]*)/([0-9.]*))`)
 	matches = regex.FindAllStringSubmatch(string(version), -1)
 	if len(matches) > 0 {
 		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][3], matches[0][4])
