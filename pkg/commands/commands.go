@@ -30,6 +30,7 @@ var (
 	//Replies with statistics about the scan queue, contents of scan queue, and memory usage.
 	STATS = Command{Name: "STATS", Prefix: "n"}
 
+	//VERSION - ClamAV version and database information
 	VERSION = Command{Name: "VERSION", Prefix: ""}
 )
 

@@ -1,4 +1,4 @@
-<p align="left"><img src="https://storage.googleapis.com/gopherizeme.appspot.com/gophers/9e5f19f595edf1bb1a51cb49e4eac9f935c1ec18.png" alt="Logo" height="200"></p> 
+<p align="left"><img src="https://storage.googleapis.com/gopherizeme.appspot.com/gophers/9e5f19f595edf1bb1a51cb49e4eac9f935c1ec18.png" alt="Logo" height="200"></p>
 
 # ClamAV Prometheus Exporter
 
@@ -22,31 +22,37 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 ```
 # HELP clamav_build_info Shows ClamAV Build Info
 # TYPE clamav_build_info gauge
-clamav_build_info{clamav_version="0.102.4",database_version="25913"} 1
-# HELP clamav_mem_heap Shows heap memory usage
-# TYPE clamav_mem_heap gauge
-clamav_mem_heap 3.656
-# HELP clamav_mem_mmap Shows mmap memory usage
-# TYPE clamav_mem_mmap gauge
-clamav_mem_mmap 0.129
-# HELP clamav_mem_used Shows used memory usage
-# TYPE clamav_mem_used gauge
-clamav_mem_used 3.236
-# HELP clamav_queue Shows queued items
-# TYPE clamav_queue counter
-clamav_queue 0
+clamav_build_info{clamav_version="0.102.4",database_version="26091"} 1
+# HELP clamav_mem_heap_bytes Shows heap memory usage in bytes
+# TYPE clamav_mem_heap_bytes gauge
+clamav_mem_heap_bytes 1.090783104e+06
+# HELP clamav_mem_mmap_bytes Shows mmap memory usage in bytes
+# TYPE clamav_mem_mmap_bytes gauge
+clamav_mem_mmap_bytes 1.076747264e+06
+# HELP clamav_mem_used_bytes Shows used memory in bytes
+# TYPE clamav_mem_used_bytes gauge
+clamav_mem_used_bytes 1.076783104e+06
+# HELP clamav_pools_total_bytes Shows total memory allocated by memory pool allocator for the signature database in bytes
+# TYPE clamav_pools_total_bytes gauge
+clamav_pools_total_bytes 1.076783104e+06
+# HELP clamav_pools_used_bytes Shows memory used by memory pool allocator for the signature database in bytes
+# TYPE clamav_pools_used_bytes gauge
+clamav_pools_used_bytes 1.076747264e+06
+# HELP clamav_queue_length Shows queued items
+# TYPE clamav_queue_length gauge
+clamav_queue_length 0
 # HELP clamav_threads_idle Shows idle threads
-# TYPE clamav_threads_idle counter
+# TYPE clamav_threads_idle gauge
 clamav_threads_idle 0
 # HELP clamav_threads_live Shows live threads
-# TYPE clamav_threads_live counter
+# TYPE clamav_threads_live gauge
 clamav_threads_live 1
 # HELP clamav_threads_max Shows max threads
-# TYPE clamav_threads_max counter
-clamav_threads_max 12
+# TYPE clamav_threads_max gauge
+clamav_threads_max 10
 # HELP clamav_up Shows UP Status
-# TYPE clamav_up counter
-clamav_up 1 
+# TYPE clamav_up gauge
+clamav_up 1
 ```
 
 ## Installation
@@ -58,7 +64,7 @@ ClamAV Prometheus Exporter requires a
 $ go get -u github.com/r3kzi/clamav-prometheus-exporter
 ```
 
-To find out where `clamav-prometheus-exporter` was installed you can run `$ go list -f {{.Target}} github.com/r3kzi/clamav-prometheus-exporter`. 
+To find out where `clamav-prometheus-exporter` was installed you can run `$ go list -f {{.Target}} github.com/r3kzi/clamav-prometheus-exporter`.
 
 For `clamav-prometheus-exporter` to be used globally add that directory to the `$PATH` environment setting.
 
@@ -82,7 +88,7 @@ Just scrape this, e.g.:
 scrape_configs:
   - job_name: 'clamav-prometheus-exporter'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:9810']
 ```
 
 ## Contributing

@@ -17,13 +17,14 @@ package clamav
 import (
 	"bufio"
 	"fmt"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
-	"github.com/stretchr/testify/assert"
 	"net"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -43,10 +44,10 @@ func TestMain(m *testing.M) {
 func TestPing(t *testing.T) {
 	go func() {
 		server, err := listener.Accept()
-		defer server.Close()
 		if err != nil {
 			t.Errorf("failed to accept connect: %s", err)
 		}
+		defer server.Close()
 		resp, err := bufio.NewReader(server).ReadBytes('\n')
 		if err != nil {
 			t.Errorf("failed to read request: %s", err)
@@ -63,10 +64,10 @@ func TestPing(t *testing.T) {
 func TestStats(t *testing.T) {
 	go func() {
 		server, err := listener.Accept()
-		defer server.Close()
 		if err != nil {
 			t.Errorf("failed to accept connect: %s", err)
 		}
+		defer server.Close()
 		resp, err := bufio.NewReader(server).ReadBytes('\n')
 		if err != nil {
 			t.Errorf("failed to read request: %s", err)
@@ -103,10 +104,10 @@ func TestStats(t *testing.T) {
 func TestVersion(t *testing.T) {
 	go func() {
 		server, err := listener.Accept()
-		defer server.Close()
 		if err != nil {
 			t.Errorf("failed to accept connect: %s", err)
 		}
+		defer server.Close()
 		resp, err := bufio.NewReader(server).ReadBytes('\n')
 		if err != nil {
 			t.Errorf("failed to read request: %s", err)
@@ -121,7 +122,7 @@ func TestVersion(t *testing.T) {
 	client := New(listener.Addr().String())
 	stats := client.Dial(commands.VERSION)
 
-	regex := regexp.MustCompile("((ClamAV)+\\s([0-9.]*)/([0-9.]*))")
+	regex := regexp.MustCompile(`((ClamAV)+\s([0-9.]*)/([0-9.]*))`)
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
 
 	assert.Equal(t, "0.102.4", matches[0][3])
