@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -30,18 +31,29 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	address string
+	port    int
+	network string
+)
+
 func init() {
 	log.SetFormatter(&log.JSONFormatter{})
+
+	flag.StringVar(&address, "clamav-address", "localhost", "ClamAV address to use")
+	flag.IntVar(&port, "clamav-port", 3310, "ClamAV port to use")
+	flag.StringVar(&network, "network", "tcp", "Network mode to use, typically tcp or unix (socket)")
+	flag.Parse()
 }
 
 func main() {
-	address := flag.String("clamav-address", "localhost", "ClamAV address to use")
-	port := flag.Int("clamav-port", 3310, "ClamAV port to use")
-	flag.Parse()
-
 	log.Info("Server is starting...")
 
-	client := clamav.New(fmt.Sprintf("%s:%d", *address, *port))
+	if strings.EqualFold(network, "tcp") {
+		address = fmt.Sprintf("%s:%d", address, port)
+	}
+
+	client := clamav.New(address, network)
 	coll := collector.New(*client)
 	prometheus.MustRegister(coll)
 

@@ -16,30 +16,31 @@ package clamav
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net"
-
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net"
 )
 
 //Client corresponds to a ClamAV client
 type Client struct {
 	address string
+	network string
 }
 
-//New create a new TCP Client for ClamAV
-func New(address string) *Client {
+//New create a new Client for ClamAV
+func New(address, network string) *Client {
 	return &Client{
 		address: address,
+		network: network,
 	}
 }
 
-// Dial connects to a tcp socket based on address. Sends commands.Command.
+// Dial connects to a tcp or unix socket based on address. Sends commands.Command.
 func (c Client) Dial(command commands.Command) []byte {
-	conn, err := net.Dial("tcp", c.address)
+	conn, err := net.Dial(c.network, c.address)
 	if err != nil {
-		log.Errorf("error creating tcp connection for command %s: %s", command, err)
+		log.Errorf("error creating socket connection for command %s: %s", command, err)
 		return nil
 	}
 	defer conn.Close()
@@ -47,7 +48,7 @@ func (c Client) Dial(command commands.Command) []byte {
 	_, _ = conn.Write([]byte(fmt.Sprintf("%s", command)))
 	resp, err := ioutil.ReadAll(conn)
 	if err != nil {
-		log.Errorf("error reading tcp response for command %s: %s", command, err)
+		log.Errorf("error reading socket response for command %s: %s", command, err)
 		return nil
 	}
 	return resp
