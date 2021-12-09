@@ -23,6 +23,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	log "github.com/sirupsen/logrus"
 )
 
 //Collector satisfies prometheus.Collector interface
@@ -92,9 +93,14 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	stats := collector.client.Dial(commands.STATS)
+	idle, err := regexp.MatchString("IDLE", string(stats))
+	if err != nil {
+		log.Errorf("error searching IDLE field in stats %s: %s", idle, err)
+		return
+	}
 	regex := regexp.MustCompile(`([0-9.]+|N/A)`)
 	matches := regex.FindAllStringSubmatch(string(stats), -1)
-	if len(matches) > 0 {
+	if len(matches) > 0 && idle == false {
 		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
 		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
 		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
@@ -104,6 +110,18 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[9][1])*1024)
 		ch <- prometheus.MustNewConstMetric(collector.poolsUsed, prometheus.GaugeValue, float(matches[13][1])*1024)
 		ch <- prometheus.MustNewConstMetric(collector.poolsTotal, prometheus.GaugeValue, float(matches[14][1])*1024)
+	}
+
+	if len(matches) > 0 && idle == true {
+		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
+		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.GaugeValue, float(matches[5][1]))
+		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[8][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[9][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[10][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.poolsUsed, prometheus.GaugeValue, float(matches[14][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.poolsTotal, prometheus.GaugeValue, float(matches[15][1])*1024)
 	}
 
 	version := collector.client.Dial(commands.VERSION)
