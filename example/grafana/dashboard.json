@@ -1,0 +1,1015 @@
+{
+    "__inputs": [
+      {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "description": "",
+        "type": "datasource",
+        "pluginId": "prometheus",
+        "pluginName": "Prometheus"
+      }
+    ],
+    "__requires": [
+      {
+        "type": "panel",
+        "id": "gauge",
+        "name": "Gauge",
+        "version": ""
+      },
+      {
+        "type": "grafana",
+        "id": "grafana",
+        "name": "Grafana",
+        "version": "8.2.2"
+      },
+      {
+        "type": "datasource",
+        "id": "prometheus",
+        "name": "Prometheus",
+        "version": "1.0.0"
+      },
+      {
+        "type": "panel",
+        "id": "table",
+        "name": "Table",
+        "version": ""
+      },
+      {
+        "type": "panel",
+        "id": "timeseries",
+        "name": "Time series",
+        "version": ""
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": null,
+    "iteration": 1639135283753,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 24,
+        "title": "Global Pool Usage",
+        "type": "row"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "semi-dark-blue",
+                  "value": null
+                },
+                {
+                  "color": "semi-dark-purple",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 8,
+          "x": 0,
+          "y": 1
+        },
+        "id": 32,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "sum(clamav_queue_length)",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Queue Lenght",
+        "type": "gauge"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "semi-dark-blue",
+                  "value": null
+                },
+                {
+                  "color": "semi-dark-purple",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 8,
+          "x": 8,
+          "y": 1
+        },
+        "id": 34,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "sum(clamav_threads_live) / sum(clamav_threads_max) * 100",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Threads Usage",
+        "type": "gauge"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "semi-dark-blue",
+                  "value": null
+                },
+                {
+                  "color": "semi-dark-purple",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 8,
+          "x": 16,
+          "y": 1
+        },
+        "id": 33,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "exemplar": true,
+            "expr": "sum(clamav_mem_used_bytes) / sum(clamav_mem_heap_bytes) * 100",
+            "hide": false,
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "C"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Heap Usage",
+        "type": "gauge"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": null,
+              "displayMode": "auto",
+              "filterable": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 6
+        },
+        "id": 57,
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": false,
+              "displayName": "database_version"
+            }
+          ]
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "clamav_build_info",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Build Info",
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "Value": true,
+                "__name__": true,
+                "job": true
+              },
+              "indexByName": {
+                "Time": 0,
+                "Value": 6,
+                "__name__": 1,
+                "clamav_version": 3,
+                "database_version": 4,
+                "instance": 2,
+                "job": 5
+              },
+              "renameByName": {}
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 12
+        },
+        "id": 15,
+        "panels": [],
+        "repeat": "instance",
+        "title": "$instance",
+        "type": "row"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "semi-dark-blue",
+                  "value": null
+                },
+                {
+                  "color": "semi-dark-purple",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 4,
+          "x": 0,
+          "y": 13
+        },
+        "id": 4,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "clamav_queue_length{instance=\"$instance\"}",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Queue Lenght",
+        "type": "gauge"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "semi-dark-blue",
+                  "value": null
+                },
+                {
+                  "color": "semi-dark-purple",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 4,
+          "x": 4,
+          "y": 13
+        },
+        "id": 2,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "clamav_mem_used_bytes{instance=\"$instance\"} / clamav_mem_heap_bytes{instance=\"$instance\"} * 100",
+            "hide": false,
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "C"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Heap Usage",
+        "type": "gauge"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "semi-dark-blue",
+                  "value": null
+                },
+                {
+                  "color": "semi-dark-purple",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 4,
+          "x": 8,
+          "y": 13
+        },
+        "id": 6,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "clamav_threads_live{instance=\"$instance\"} / clamav_threads_max{instance=\"$instance\"} * 100",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Threads Usage",
+        "type": "gauge"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 15,
+              "gradientMode": "scheme",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "idle"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "super-light-yellow",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 13
+        },
+        "id": 11,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        },
+        "pluginVersion": "8.2.2",
+        "repeat": null,
+        "targets": [
+          {
+            "expr": "clamav_threads_max{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "Max",
+            "refId": "A"
+          },
+          {
+            "expr": "clamav_threads_live{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "Live",
+            "refId": "B"
+          },
+          {
+            "expr": "clamav_threads_idle{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "idle",
+            "refId": "C"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Threads Usage",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 15,
+              "gradientMode": "scheme",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 18
+        },
+        "id": 10,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        },
+        "pluginVersion": "8.2.2",
+        "repeat": null,
+        "targets": [
+          {
+            "expr": "clamav_queue_length{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "count",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Queue Lenght",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 15,
+              "gradientMode": "scheme",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "deckbytes"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "mmap"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "super-light-yellow",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 21
+        },
+        "id": 36,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "clamav_mem_heap_bytes{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "Heap",
+            "refId": "A"
+          },
+          {
+            "expr": "clamav_mem_used_bytes{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "Used",
+            "refId": "B"
+          },
+          {
+            "expr": "clamav_mem_mmap_bytes{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "mmap",
+            "refId": "C"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Memory Detailed",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${DS_PROMETHEUS}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 15,
+              "gradientMode": "scheme",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "decimals": 6,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "deckbytes"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 26
+        },
+        "id": 38,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        },
+        "pluginVersion": "8.2.2",
+        "targets": [
+          {
+            "expr": "clamav_pools_total_bytes{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "Total",
+            "refId": "A"
+          },
+          {
+            "expr": "clamav_pools_used_bytes{instance=\"$instance\"}",
+            "interval": "",
+            "legendFormat": "Used",
+            "refId": "B"
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Pool Usage",
+        "type": "timeseries"
+      }
+    ],
+    "schemaVersion": 31,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "Prometheus",
+            "value": "Prometheus"
+          },
+          "description": null,
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "Prometheus",
+          "options": [],
+          "query": "prometheus",
+          "queryValue": "",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "type": "datasource"
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "$Prometheus",
+          "definition": "clamav_build_info",
+          "description": null,
+          "error": null,
+          "hide": 0,
+          "includeAll": true,
+          "label": null,
+          "multi": true,
+          "name": "instance",
+          "options": [],
+          "query": {
+            "query": "clamav_build_info",
+            "refId": "Prometheus-instance-Variable-Query"
+          },
+          "refresh": 1,
+          "regex": "/.*instance=\"([^\"]*).*/",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        }
+      ]
+    },
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "ClamAV Exporter",
+    "uid": "7faGgp2nk",
+    "version": 12
+  }
