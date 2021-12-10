@@ -137,7 +137,7 @@
         ],
         "timeFrom": null,
         "timeShift": null,
-        "title": "Queue Lenght",
+        "title": "Queue Length",
         "type": "gauge"
       },
       {
@@ -418,7 +418,7 @@
         ],
         "timeFrom": null,
         "timeShift": null,
-        "title": "Queue Lenght",
+        "title": "Queue Length",
         "type": "gauge"
       },
       {
@@ -742,7 +742,7 @@
         ],
         "timeFrom": null,
         "timeShift": null,
-        "title": "Queue Lenght",
+        "title": "Queue Length",
         "type": "timeseries"
       },
       {
