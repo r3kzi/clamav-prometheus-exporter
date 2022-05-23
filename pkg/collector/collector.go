@@ -19,6 +19,8 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
@@ -40,6 +42,7 @@ type Collector struct {
 	poolsUsed   *prometheus.Desc
 	poolsTotal  *prometheus.Desc
 	buildInfo   *prometheus.Desc
+	databaseAge *prometheus.Desc
 }
 
 //New creates a Collector struct
@@ -57,6 +60,7 @@ func New(client clamav.Client) *Collector {
 		poolsUsed:   prometheus.NewDesc("clamav_pools_used_bytes", "Shows memory used by memory pool allocator for the signature database in bytes", nil, nil),
 		poolsTotal:  prometheus.NewDesc("clamav_pools_total_bytes", "Shows total memory allocated by memory pool allocator for the signature database in bytes", nil, nil),
 		buildInfo:   prometheus.NewDesc("clamav_build_info", "Shows ClamAV Build Info", []string{"clamav_version", "database_version"}, nil),
+		databaseAge: prometheus.NewDesc("clamav_database_age", "Shows ClamAV signature database age in seconds", nil, nil),
 	}
 }
 
@@ -73,6 +77,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.poolsUsed
 	ch <- collector.poolsTotal
 	ch <- collector.buildInfo
+	ch <- collector.databaseAge
 }
 
 //Collect satisfies prometheus.Collector.Collect
@@ -131,4 +136,19 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][3], matches[0][4])
 	}
 
+	strBuilddate := strings.Split(string(version), "/")[2]
+	// Remove newline
+	strBuilddate = strings.Replace(strBuilddate, "\n", "", -1)
+
+	// Parse string as date type
+	dateFmt := "Mon Jan 2 15:04:05 2006"
+	builddate, err := time.Parse(dateFmt, strBuilddate)
+
+	if err != nil {
+		log.Error("Error parsing ClamAV date: ", err)
+		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Now().Unix()))
+		return
+	}
+
+	ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
 }

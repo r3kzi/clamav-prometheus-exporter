@@ -18,6 +18,7 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 - ClamAVMemMMap
 - ClamAVMemUsed
 - ClamAVBuildInfo
+- ClamAVDatabaseAge
 
 ```
 # HELP clamav_build_info Shows ClamAV Build Info
@@ -53,6 +54,9 @@ clamav_threads_max 10
 # HELP clamav_up Shows UP Status
 # TYPE clamav_up gauge
 clamav_up 1
+# HELP clamav_database_age Shows ClamAV signature database age in seconds
+# TYPE clamav_database_age gauge
+clamav_database_age 447408.4671055
 ```
 
 ## Installation
