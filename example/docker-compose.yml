@@ -10,7 +10,7 @@ services:
     volumes:
       - ./prometheus/:/etc/prometheus/
     ports:
-      - 9810:9810
+      - 9090:9090
     links:
       - clamav-prometheus-exporter:clamav-prometheus-exporter
 
@@ -18,8 +18,12 @@ services:
     image: rekzi/clamav-prometheus-exporter:latest
     command:
       - '--clamav-address=clamav'
+    ports:
+      - 9810:9810
     links:
       - clamav:clamav
 
   clamav:
     image: mkodockx/docker-clamav
+    ports:
+      - 3310:3310
