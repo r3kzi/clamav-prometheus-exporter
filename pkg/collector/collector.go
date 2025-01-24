@@ -23,7 +23,6 @@ import (
 	"math"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -99,7 +98,6 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	collector.CollectThreads(ch, string(stats))
 	collector.CollectQueue(ch, string(stats))
 	collector.CollectBuildInfo(ch)
-
 }
 
 func float(s string) float64 {
@@ -114,7 +112,7 @@ func (collector *Collector) CollectMemoryStats(ch chan<- prometheus.Metric, stat
 	regex := regexp.MustCompile(`(?:MEMSTATS:\sheap|mmap|used|free|releasable|pools|pools_used|pools_total)\s+([0-9.]+|N\/A)+`)
 	matches := regex.FindAllStringSubmatch(stats, -1)
 
-	log.Info("Matches Memory Stats", matches)
+	log.Debug("Matches Memory Stats", matches)
 
 	//MEMORY STATS
 	if len(matches) > 0 {
@@ -163,24 +161,26 @@ func (collector *Collector) CollectQueue(ch chan<- prometheus.Metric, stats stri
 
 func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
 	version := collector.client.Dial(commands.VERSION)
-	regex := regexp.MustCompile(`((ClamAV)+\s([0-9.]*)/([0-9.]*))`)
+	regex := regexp.MustCompile(`(ClamAV)+\s([0-9.]*)/([0-9.]*)/(\w{3}\s\w{3}\s\d+\s\d+:\d+:\d+\s\d{4})*`)
 	matches := regex.FindAllStringSubmatch(string(version), -1)
+
+	log.Debug("Matches Version", matches)
+
 	if len(matches) > 0 {
-		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][3], matches[0][4])
-	}
+		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][2], matches[0][3])
 
-	if strings.Contains(string(version), "/") {
-		strBuilddate := strings.Split(string(version), "/")[2]
-		// Remove newline
-		strBuilddate = strings.Replace(strBuilddate, "\n", "", -1)
-
-		// Parse string as date type
 		dateFmt := "Mon Jan 2 15:04:05 2006"
+		strBuilddate := time.Now().UTC().String()
+
+		if len(matches[0]) == 5 {
+			strBuilddate = matches[0][4]
+		}
+
+		log.Info(strBuilddate)
 		builddate, err := time.Parse(dateFmt, strBuilddate)
 
 		if err != nil {
 			log.Error("Error parsing ClamAV date: ", err)
-			ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Now().Unix()))
 			return
 		}
 
