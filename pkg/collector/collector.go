@@ -16,19 +16,18 @@ package collector
 
 import (
 	"bytes"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
+	log "github.com/sirupsen/logrus"
 	"math"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
-	"github.com/r3kzi/clamav-prometheus-exporter/pkg/commands"
-	log "github.com/sirupsen/logrus"
 )
 
-//Collector satisfies prometheus.Collector interface
+// Collector satisfies prometheus.Collector interface
 type Collector struct {
 	client      clamav.Client
 	up          *prometheus.Desc
@@ -45,7 +44,7 @@ type Collector struct {
 	databaseAge *prometheus.Desc
 }
 
-//New creates a Collector struct
+// New creates a Collector struct
 func New(client clamav.Client) *Collector {
 	return &Collector{
 		client:      client,
@@ -64,7 +63,7 @@ func New(client clamav.Client) *Collector {
 	}
 }
 
-//Describe satisfies prometheus.Collector.Describe
+// Describe satisfies prometheus.Collector.Describe
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.up
 	ch <- collector.threadsLive
@@ -80,7 +79,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.databaseAge
 }
 
-//Collect satisfies prometheus.Collector.Collect
+// Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	pong := collector.client.Dial(commands.PING)
 	if bytes.Equal(pong, []byte{'P', 'O', 'N', 'G', '\n'}) {
@@ -89,49 +88,83 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(collector.up, prometheus.GaugeValue, 0)
 	}
 
-	float := func(s string) float64 {
-		float, err := strconv.ParseFloat(s, 64)
-		if err != nil {
-			float = math.NaN()
-		}
-		return float
-	}
-
 	stats := collector.client.Dial(commands.STATS)
 	idle, err := regexp.MatchString("IDLE", string(stats))
 	if err != nil {
 		log.Errorf("error searching IDLE field in stats %s: %s", idle, err)
 		return
 	}
-	regex := regexp.MustCompile(`([0-9.]+|N/A)`)
-	matches := regex.FindAllStringSubmatch(string(stats), -1)
-	if len(matches) > 0 && idle == false {
-		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
-		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.GaugeValue, float(matches[5][1]))
-		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[7][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[8][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[9][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.poolsUsed, prometheus.GaugeValue, float(matches[13][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.poolsTotal, prometheus.GaugeValue, float(matches[14][1])*1024)
-	}
 
-	if len(matches) > 0 && idle == true {
-		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
-		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.GaugeValue, float(matches[5][1]))
-		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[8][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[9][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[10][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.poolsUsed, prometheus.GaugeValue, float(matches[14][1])*1024)
-		ch <- prometheus.MustNewConstMetric(collector.poolsTotal, prometheus.GaugeValue, float(matches[15][1])*1024)
-	}
+	collector.CollectMemoryStats(ch, string(stats))
+	collector.CollectThreads(ch, string(stats))
+	collector.CollectQueue(ch, string(stats))
+	collector.CollectBuildInfo(ch)
 
+}
+
+func float(s string) float64 {
+	float, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		float = math.NaN()
+	}
+	return float
+}
+
+func (collector *Collector) CollectMemoryStats(ch chan<- prometheus.Metric, stats string) {
+	regex := regexp.MustCompile(`(?:MEMSTATS:\sheap|mmap|used|free|releasable|pools|pools_used|pools_total)\s+([0-9.]+|N\/A)+`)
+	matches := regex.FindAllStringSubmatch(stats, -1)
+
+	log.Info("Matches Memory Stats", matches)
+
+	//MEMORY STATS
+	if len(matches) > 0 {
+		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[0][1])*1024)
+		log.Debug("memHeap: ", float(matches[1][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.memMmap, prometheus.GaugeValue, float(matches[1][1])*1024)
+		log.Debug("memMmap: ", float(matches[2][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.memUsed, prometheus.GaugeValue, float(matches[2][1])*1024)
+		log.Debug("memUsed: ", float(matches[3][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.poolsUsed, prometheus.GaugeValue, float(matches[6][1])*1024)
+		log.Debug("poolsUsed: ", float(matches[6][1])*1024)
+		ch <- prometheus.MustNewConstMetric(collector.poolsTotal, prometheus.GaugeValue, float(matches[7][1])*1024)
+		log.Debug("poolsTotal: ", float(matches[7][1])*1024)
+	}
+}
+
+func (collector *Collector) CollectThreads(ch chan<- prometheus.Metric, stats string) {
+	regex := regexp.MustCompile(`(?:THREADS:\slive|idle|max|idle-timeout)\s+([0-9.]+|N\/A)+`)
+	matches := regex.FindAllStringSubmatch(stats, -1)
+
+	log.Debug("Matches Threads", matches)
+
+	//THREADS
+	if len(matches) > 0 {
+		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
+		log.Debug("threadsLive: ", float(matches[1][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
+		log.Debug("threadsIdle: ", float(matches[2][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
+		log.Debug("threadsMax: ", float(matches[3][1]))
+	}
+}
+
+func (collector *Collector) CollectQueue(ch chan<- prometheus.Metric, stats string) {
+	regex := regexp.MustCompile(`(?:QUEUE:|FILDES|STATS)\s+([0-9.]+|N\/A)`)
+	matches := regex.FindAllStringSubmatch(stats, -1)
+
+	log.Debug("Matches Queue", matches)
+
+	//QUEUE
+	if len(matches) > 0 {
+		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.GaugeValue, float(matches[0][1]))
+		log.Debug("queue: ", float(matches[0][1]))
+	}
+}
+
+func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
 	version := collector.client.Dial(commands.VERSION)
-	regex = regexp.MustCompile(`((ClamAV)+\s([0-9.]*)/([0-9.]*))`)
-	matches = regex.FindAllStringSubmatch(string(version), -1)
+	regex := regexp.MustCompile(`((ClamAV)+\s([0-9.]*)/([0-9.]*))`)
+	matches := regex.FindAllStringSubmatch(string(version), -1)
 	if len(matches) > 0 {
 		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][3], matches[0][4])
 	}
