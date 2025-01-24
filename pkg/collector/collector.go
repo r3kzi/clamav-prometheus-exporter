@@ -28,7 +28,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//Collector satisfies prometheus.Collector interface
+// Collector satisfies prometheus.Collector interface
 type Collector struct {
 	client      clamav.Client
 	up          *prometheus.Desc
@@ -45,7 +45,7 @@ type Collector struct {
 	databaseAge *prometheus.Desc
 }
 
-//New creates a Collector struct
+// New creates a Collector struct
 func New(client clamav.Client) *Collector {
 	return &Collector{
 		client:      client,
@@ -64,7 +64,7 @@ func New(client clamav.Client) *Collector {
 	}
 }
 
-//Describe satisfies prometheus.Collector.Describe
+// Describe satisfies prometheus.Collector.Describe
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.up
 	ch <- collector.threadsLive
@@ -80,7 +80,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.databaseAge
 }
 
-//Collect satisfies prometheus.Collector.Collect
+// Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	pong := collector.client.Dial(commands.PING)
 	if bytes.Equal(pong, []byte{'P', 'O', 'N', 'G', '\n'}) {
@@ -100,7 +100,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	stats := collector.client.Dial(commands.STATS)
 	idle, err := regexp.MatchString("IDLE", string(stats))
 	if err != nil {
-		log.Errorf("error searching IDLE field in stats %s: %s", idle, err)
+		log.Errorf(`error searching IDLE field in stats %v: %s`, idle, err)
 		return
 	}
 	regex := regexp.MustCompile(`([0-9.]+|N/A)`)
