@@ -136,19 +136,21 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][3], matches[0][4])
 	}
 
-	strBuilddate := strings.Split(string(version), "/")[2]
-	// Remove newline
-	strBuilddate = strings.Replace(strBuilddate, "\n", "", -1)
+	if strings.Contains(string(version), "/") {
+		strBuilddate := strings.Split(string(version), "/")[2]
+		// Remove newline
+		strBuilddate = strings.Replace(strBuilddate, "\n", "", -1)
 
-	// Parse string as date type
-	dateFmt := "Mon Jan 2 15:04:05 2006"
-	builddate, err := time.Parse(dateFmt, strBuilddate)
+		// Parse string as date type
+		dateFmt := "Mon Jan 2 15:04:05 2006"
+		builddate, err := time.Parse(dateFmt, strBuilddate)
 
-	if err != nil {
-		log.Error("Error parsing ClamAV date: ", err)
-		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Now().Unix()))
-		return
+		if err != nil {
+			log.Error("Error parsing ClamAV date: ", err)
+			ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Now().Unix()))
+			return
+		}
+
+		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
 	}
-
-	ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
 }
