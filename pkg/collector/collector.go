@@ -28,7 +28,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//Collector satisfies prometheus.Collector interface
+// Collector satisfies prometheus.Collector interface
 type Collector struct {
 	client      clamav.Client
 	up          *prometheus.Desc
@@ -45,7 +45,7 @@ type Collector struct {
 	databaseAge *prometheus.Desc
 }
 
-//New creates a Collector struct
+// New creates a Collector struct
 func New(client clamav.Client) *Collector {
 	return &Collector{
 		client:      client,
@@ -64,7 +64,7 @@ func New(client clamav.Client) *Collector {
 	}
 }
 
-//Describe satisfies prometheus.Collector.Describe
+// Describe satisfies prometheus.Collector.Describe
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.up
 	ch <- collector.threadsLive
@@ -80,7 +80,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.databaseAge
 }
 
-//Collect satisfies prometheus.Collector.Collect
+// Collect satisfies prometheus.Collector.Collect
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	pong := collector.client.Dial(commands.PING)
 	if bytes.Equal(pong, []byte{'P', 'O', 'N', 'G', '\n'}) {
@@ -141,16 +141,14 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		// Remove newline
 		strBuilddate = strings.Replace(strBuilddate, "\n", "", -1)
 
-		// Parse string as date type
-		dateFmt := "Mon Jan 2 15:04:05 2006"
-		builddate, err := time.Parse(dateFmt, strBuilddate)
-
+		// Parse string as date type based on RFC850
+		buildDate, err := time.Parse("Mon Jan 2 15:04:05 2006", strBuilddate)
 		if err != nil {
 			log.Error("Error parsing ClamAV date: ", err)
 			ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Now().Unix()))
 			return
 		}
 
-		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
+		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, time.Since(buildDate).Seconds())
 	}
 }
