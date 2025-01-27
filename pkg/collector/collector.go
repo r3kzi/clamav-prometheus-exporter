@@ -181,6 +181,6 @@ func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
 			log.Error("Error parsing ClamAV date: ", err)
 		}
 
-		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
+		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, time.Since(builddate).Seconds())
 	}
 }
