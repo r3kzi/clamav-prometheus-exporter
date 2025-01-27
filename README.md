@@ -72,6 +72,11 @@ To find out where `clamav-prometheus-exporter` was installed you can run `$ go l
 
 For `clamav-prometheus-exporter` to be used globally add that directory to the `$PATH` environment setting.
 
+You could also build the binary yourself running:
+```shell script
+$ CGO_ENABLED=0 && go build -installsuffix 'static' -o clamav-prometheus-exporter .
+```
+
 ## Flags
 
 [ClamAV](https://www.clamav.net/) server to connect to:

@@ -184,6 +184,6 @@ func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
 			return
 		}
 
-		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
+		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, time.Since(buildDate).Seconds())
 	}
 }
