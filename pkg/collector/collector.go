@@ -161,29 +161,26 @@ func (collector *Collector) CollectQueue(ch chan<- prometheus.Metric, stats stri
 
 func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
 	version := collector.client.Dial(commands.VERSION)
-	regex := regexp.MustCompile(`(ClamAV)+\s([0-9.]*)/([0-9.]*)/(\w{3}\s\w{3}\s\d+\s\d+:\d+:\d+\s\d{4})*`)
-	matches := regex.FindAllStringSubmatch(string(version), -1)
+	regex := regexp.MustCompile(`ClamAV\s([0-9.]*)/(\d+)/(.+)`)
+	matches := regex.FindStringSubmatch(string(version))
 
 	log.Debug("Matches Version", matches)
 
-	if len(matches) > 0 {
-		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[0][2], matches[0][3])
+	if len(matches) >= 3 {
+		ch <- prometheus.MustNewConstMetric(collector.buildInfo, prometheus.GaugeValue, 1, matches[1], matches[2])
 
-		dateFmt := "Mon Jan 2 15:04:05 2006"
 		strBuilddate := time.Now().UTC().String()
 
-		if len(matches[0]) == 5 {
-			strBuilddate = matches[0][4]
+		if len(matches) == 4 {
+			strBuilddate = matches[3]
 		}
 
-		log.Info(strBuilddate)
-		builddate, err := time.Parse(dateFmt, strBuilddate)
+		builddate, err := time.Parse("Mon Jan 2 15:04:05 2006", strBuilddate)
 
 		if err != nil {
 			log.Error("Error parsing ClamAV date: ", err)
-			return
 		}
 
-		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, time.Since(builddate).Seconds())
+		ch <- prometheus.MustNewConstMetric(collector.databaseAge, prometheus.GaugeValue, float64(time.Since(builddate).Seconds()))
 	}
 }
