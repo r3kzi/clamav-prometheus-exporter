@@ -55,6 +55,8 @@ func TestClient(t *testing.T) {
 						"STATE: VALID PRIMARY\n" +
 						"THREADS: live 1  idle 0 max 12 idle-timeout 30\n" +
 						"QUEUE: 0 items\n\t" +
+						"        FILDES 41.249971 fd[11]\n" +
+						"        STATS 0.000075\n" +
 						"STATS 0.000146 \n\n" +
 						"MEMSTATS: heap 3.656M mmap 0.129M used 3.236M free 0.420M releasable 0.127M pools 1 pools_used 1089.550M pools_total 1089.585M\n" +
 						"END"
@@ -75,8 +77,8 @@ func TestClient(t *testing.T) {
 		assert.Equal(t, "0", matches[2][1])
 		assert.Equal(t, "12", matches[3][1])
 		assert.Equal(t, "0", matches[5][1])
-		assert.Equal(t, "3.656", matches[7][1])
-		assert.Equal(t, "0.129", matches[8][1])
-		assert.Equal(t, "3.236", matches[9][1])
+		assert.Equal(t, "3.656", matches[10][1])
+		assert.Equal(t, "0.129", matches[11][1])
+		assert.Equal(t, "3.236", matches[12][1])
 	}
 }
