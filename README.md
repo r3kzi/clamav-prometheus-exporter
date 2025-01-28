@@ -87,8 +87,10 @@ Usage of clamav-prometheus-exporter:
     	ClamAV address to use (default "localhost")
   -clamav-port int
     	ClamAV port to use (default 3310)
+  -log-level string
+    	Set the level of logging. (options: trace, debug, info, warn, error, fatal, panic) (default "info")
   -network string
-        Network mode to use (default "tcp")  	
+    	Network mode to use, typically tcp or unix (socket) (default "tcp")
 ```
 
 ## Prometheus config
