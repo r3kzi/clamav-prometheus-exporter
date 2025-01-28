@@ -114,7 +114,7 @@ func (collector *Collector) CollectMemoryStats(ch chan<- prometheus.Metric, stat
 
 	log.Debug("Matches Memory Stats", matches)
 
-	//MEMORY STATS
+	// MEMORY STATS
 	if len(matches) > 0 {
 		ch <- prometheus.MustNewConstMetric(collector.memHeap, prometheus.GaugeValue, float(matches[0][1])*1024)
 		log.Debug("memHeap: ", float(matches[1][1])*1024)
@@ -135,7 +135,7 @@ func (collector *Collector) CollectThreads(ch chan<- prometheus.Metric, stats st
 
 	log.Debug("Matches Threads", matches)
 
-	//THREADS
+	// THREADS
 	if len(matches) > 0 {
 		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
 		log.Debug("threadsLive: ", float(matches[1][1]))
@@ -152,7 +152,7 @@ func (collector *Collector) CollectQueue(ch chan<- prometheus.Metric, stats stri
 
 	log.Debug("Matches Queue", matches)
 
-	//QUEUE
+	// QUEUE
 	if len(matches) > 0 {
 		ch <- prometheus.MustNewConstMetric(collector.queue, prometheus.GaugeValue, float(matches[0][1]))
 		log.Debug("queue: ", float(matches[0][1]))
@@ -160,8 +160,12 @@ func (collector *Collector) CollectQueue(ch chan<- prometheus.Metric, stats stri
 }
 
 func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
+	// The return of this should be something like: ClamAV 1.4.1/27523/Sun Jan 19 09:40:50 2025
 	version := collector.client.Dial(commands.VERSION)
 	regex := regexp.MustCompile(`ClamAV\s([0-9.]*)/(\d+)/(.+)`)
+
+	// The match will be a list of four elements:
+	// length=4 => [0]: ClamAV, [1]: 1.4.1, [2]: 27523, [3]: Sun Jan 19 09:40:50 2025
 	matches := regex.FindStringSubmatch(string(version))
 
 	log.Debug("Matches Version", matches)
@@ -171,10 +175,14 @@ func (collector *Collector) CollectBuildInfo(ch chan<- prometheus.Metric) {
 
 		strBuilddate := time.Now().UTC().String()
 
+		// If the regular expression match returns a list with length 4,
+		// it means that the VERSION command return has a date.
+		// Otherwise, it ignores it and uses the current time.
 		if len(matches) == 4 {
 			strBuilddate = matches[3]
 		}
 
+		// Parse string as date type based on RFC850
 		builddate, err := time.Parse("Mon Jan 2 15:04:05 2006", strBuilddate)
 
 		if err != nil {

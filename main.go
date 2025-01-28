@@ -36,7 +36,29 @@ var (
 	address string
 	port    int
 	network string
+	logLevel string
 )
+
+func setLogLevel(level string) {
+	switch strings.ToUpper(strings.TrimSpace(level)) {
+	case "TRACE":
+		log.SetLevel(log.TraceLevel)
+	case "DEBUG":
+		log.SetLevel(log.DebugLevel)
+	case "WARN", "WARNING":
+		log.SetLevel(log.WarnLevel)
+	case "ERROR":
+		log.SetLevel(log.ErrorLevel)
+	case "FATAL":
+		log.SetLevel(log.FatalLevel)
+	case "PANIC":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
+	}
+
+	log.Debug("Log level is: ", log.GetLevel())
+}
 
 func init() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -44,7 +66,11 @@ func init() {
 	flag.StringVar(&address, "clamav-address", "localhost", "ClamAV address to use")
 	flag.IntVar(&port, "clamav-port", 3310, "ClamAV port to use")
 	flag.StringVar(&network, "network", "tcp", "Network mode to use, typically tcp or unix (socket)")
+	flag.StringVar(&logLevel, "log-level", "info", "Set the level of logging. (options: trace, debug, info, warn, error, fatal, panic)")
+
 	flag.Parse()
+
+	setLogLevel(logLevel)
 }
 
 func main() {
