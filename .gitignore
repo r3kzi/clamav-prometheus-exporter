@@ -1,9 +1,11 @@
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+clamav-prometheus-exporter
 
 # Test binary, built with `go test -c`
 *.test
