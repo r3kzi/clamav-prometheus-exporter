@@ -1,6 +1,6 @@
 module github.com/r3kzi/clamav-prometheus-exporter
 
-go 1.21
+go 1.23
 
 require (
 	github.com/prometheus/client_golang v1.20.5
