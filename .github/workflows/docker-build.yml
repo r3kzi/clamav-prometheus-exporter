@@ -12,6 +12,7 @@ on:
 
 env:
   IMAGE_NAME: clamav-prometheus-exporter
+  IMAGE_TAG: latest
 
 jobs:
   build:
@@ -48,7 +49,7 @@ jobs:
       # Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build . -f Dockerfile -t $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          docker build . -f Dockerfile -t $IMAGE_NAME:$IMAGE_TAG
 
   push:
     name: Push Docker Image to Docker Hub
@@ -63,6 +64,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Build the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build . -f Dockerfile -t $IMAGE_NAME:$IMAGE_TAG --label "runnumber=${GITHUB_RUN_ID}"
+
       # Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -75,11 +81,11 @@ jobs:
         run: |
           IMAGE_ID=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=latest
+          VERSION=$IMAGE_TAG
 
           [[ "${{ github.ref_type }}" == "tag" ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,;s/^v//')
 
           echo VERSION=$VERSION
 
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
