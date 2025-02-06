@@ -80,4 +80,4 @@ jobs:
 
       # Push the Docker image
       - name: Push Docker Image
-        run: make push VERSION=$VERSION"
+        run: make push VERSION=$VERSION
