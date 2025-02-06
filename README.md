@@ -9,21 +9,26 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 
 ## Currently exposed metrics
 
-- ClamAVUp
-- ClamAVThreadsLive
-- ClamAVThreadsIdle
-- ClamAVThreadsMax
-- ClamAVQueue
-- ClamAVMemHeap
-- ClamAVMemMMap
-- ClamAVMemUsed
 - ClamAVBuildInfo
 - ClamAVDatabaseAge
+- ClamAVMemHeap
+- ClamAVMemMmap
+- ClamAVMemUsed
+- ClamAVPoolsTotal
+- ClamAVPoolsUsed
+- ClamAVQueue
+- ClamAVThreadsIdle
+- ClamAVThreadsLive
+- ClamAVThreadsMax
+- ClamAVUp
 
 ```
 # HELP clamav_build_info Shows ClamAV Build Info
 # TYPE clamav_build_info gauge
 clamav_build_info{clamav_version="0.102.4",database_version="26091"} 1
+# HELP clamav_database_age Shows ClamAV signature database age in seconds
+# TYPE clamav_database_age gauge
+clamav_database_age 447408.4671055
 # HELP clamav_mem_heap_bytes Shows heap memory usage in bytes
 # TYPE clamav_mem_heap_bytes gauge
 clamav_mem_heap_bytes 1.090783104e+06
@@ -54,17 +59,13 @@ clamav_threads_max 10
 # HELP clamav_up Shows UP Status
 # TYPE clamav_up gauge
 clamav_up 1
-# HELP clamav_database_age Shows ClamAV signature database age in seconds
-# TYPE clamav_database_age gauge
-clamav_database_age 447408.4671055
 ```
 
 ## Installation
 
-ClamAV Prometheus Exporter requires a
-[supported release of Go](https://golang.org/doc/devel/release.html#policy).
+ClamAV Prometheus Exporter requires a [supported release of Go](https://golang.org/doc/devel/release.html#policy).
 
-```shell script
+```shell
 $ go get -u github.com/r3kzi/clamav-prometheus-exporter
 ```
 
@@ -73,24 +74,25 @@ To find out where `clamav-prometheus-exporter` was installed you can run `$ go l
 For `clamav-prometheus-exporter` to be used globally add that directory to the `$PATH` environment setting.
 
 You could also build the binary yourself running:
-```shell script
-$ CGO_ENABLED=0 && go build -installsuffix 'static' -o clamav-prometheus-exporter .
+
+```shell
+$ make build
 ```
 
 ## Flags
 
 [ClamAV](https://www.clamav.net/) server to connect to:
 
-```shell script
+```shell
 Usage of clamav-prometheus-exporter:
   -clamav-address string
-    	ClamAV address to use (default "localhost")
+      ClamAV address to use (default "localhost")
   -clamav-port int
-    	ClamAV port to use (default 3310)
+      ClamAV port to use (default 3310)
   -log-level string
-    	Set the level of logging. (options: trace, debug, info, warn, error, fatal, panic) (default "info")
+      Set the level of logging. (options: trace, debug, info, warn, error, fatal, panic) (default "info")
   -network string
-    	Network mode to use, typically tcp or unix (socket) (default "tcp")
+      Network mode to use, typically tcp or unix (socket) (default "tcp")
 ```
 
 ## Prometheus config
@@ -103,6 +105,17 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9810']
 ```
+
+## Release
+
+Versions are released following [semantic versioning](https://semver.org/) pattern.
+
+For a new version to be generated, a `Release` and `Tag`
+must be created in the repository following the pattern: `v.X.Y.Z`.
+
+This will trigger a [GitHub Action](.github/workflows/docker-build.yml) and make a new image available on
+[DockerHub](https://hub.docker.com/r/rekzi/clamav-prometheus-exporter),
+where the tag pattern will be: `rekzi/clamav-prometheus-exporter:X.Y.Z`.
 
 ## Contributing
 
