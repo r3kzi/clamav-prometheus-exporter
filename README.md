@@ -108,14 +108,17 @@ scrape_configs:
 
 ## Release
 
-Versions are released following [semantic versioning](https://semver.org/) pattern.
+For a new version of the application, bump version in the [VERSION](./VERSION) file.
 
-For a new version to be generated, a `Release` and `Tag`
-must be created in the repository following the pattern: `v.X.Y.Z`.
+>[!NOTE]
+>The version in the file must follow the [Semantic Version](https://semver.org/) pattern: `X.Y.Z`.
 
-This will trigger a [GitHub Action](.github/workflows/docker-build.yml) and make a new image available on
-[DockerHub](https://hub.docker.com/r/rekzi/clamav-prometheus-exporter),
-where the tag pattern will be: `rekzi/clamav-prometheus-exporter:X.Y.Z`.
+This will trigger a  [GitHub Action](.github/workflows/docker-build.yml) that will be responsible
+for creating a new image on [DockerHub](https://hub.docker.com/r/rekzi/clamav-prometheus-exporter)
+in the pattern: `rekzi/clamav-prometheus-exporter:X.Y.Z`
+
+In addition, a Release will be created in the repository in addition to the version patch increment,
+following the pattern: `X.Y.Z-snapshot`
 
 ## Contributing
 
