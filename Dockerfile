@@ -4,7 +4,7 @@ WORKDIR /go/src/github.com/rekzi/clamav-prometheus-exporter/
 COPY . .
 
 RUN apk add --no-cache make
-RUN make build
+RUN make build-version
 
 # Final stage: the running container.
 # Use a minimal image for running the application
