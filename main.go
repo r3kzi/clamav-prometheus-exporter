@@ -32,6 +32,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var version = ""
+
 var (
 	address string
 	port    int
@@ -75,6 +77,7 @@ func init() {
 
 func main() {
 	log.Info("Server is starting...")
+	log.Infof("Version: %s", version)
 
 	if strings.EqualFold(network, "tcp") {
 		address = fmt.Sprintf("%s:%d", address, port)
