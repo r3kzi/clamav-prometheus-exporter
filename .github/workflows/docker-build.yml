@@ -11,8 +11,7 @@ on:
       - master
 
 env:
-  IMAGE_NAME: clamav-prometheus-exporter
-  IMAGE_TAG: latest
+  VERSION: latest
 
 jobs:
   build:
@@ -48,8 +47,7 @@ jobs:
 
       # Build the Docker image
       - name: Build Docker Image
-        run: |
-          docker build . -f Dockerfile -t $IMAGE_NAME:$IMAGE_TAG
+        run: make image VERSION=$VERSION
 
   push:
     name: Push Docker Image to Docker Hub
@@ -67,7 +65,11 @@ jobs:
       # Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build . -f Dockerfile -t $IMAGE_NAME:$IMAGE_TAG --label "runnumber=${GITHUB_RUN_ID}"
+          [[ "${{ github.ref_type }}" == "tag" ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,;s/^v//')
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+          make image VERSION=$VERSION IMAGE_EXTRA_ARGS='--label "runnumber=${GITHUB_RUN_ID}"'
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -78,14 +80,4 @@ jobs:
 
       # Push the Docker image
       - name: Push Docker Image
-        run: |
-          IMAGE_ID=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=$IMAGE_TAG
-
-          [[ "${{ github.ref_type }}" == "tag" ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,;s/^v//')
-
-          echo VERSION=$VERSION
-
-          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+        run: make push VERSION=$VERSION"
