@@ -1,5 +1,5 @@
 # First stage: build the executable.
-FROM golang:1.23-alpine as builder
+FROM golang:1.23-alpine AS builder
 WORKDIR /go/src/github.com/rekzi/clamav-prometheus-exporter/
 COPY . .
 
