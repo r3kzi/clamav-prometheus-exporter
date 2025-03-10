@@ -63,7 +63,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name == 'push' &&
-              github.ref == 'refs/heads/main' }}
+              github.ref == 'refs/heads/master' }}
           platforms: linux/arm/v7,linux/arm64/v8,linux/amd64
           tags: |
             ${{ github.repository  }}:${{ steps.vars.outputs.sha_short }}
