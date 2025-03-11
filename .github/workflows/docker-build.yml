@@ -1,5 +1,4 @@
 name: Build and Push Docker Image
-
 on:
   push:
     branches:
@@ -9,23 +8,20 @@ on:
   pull_request:
     branches:
       - master
-
 env:
   VERSION: latest
-
 jobs:
   build:
     name: Build Go Application
     runs-on: ubuntu-latest
-
     steps:
       # Checkout the repository
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Set up Go environment
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: 1.23
 
@@ -34,50 +30,46 @@ jobs:
         run: |
           go mod tidy
           go build -o app .
-
   docker-build:
-    name: Build Docker Image
+    name: Build and push Docker Image
     runs-on: ubuntu-latest
     needs: build # Ensure this job runs after "build"
 
     steps:
       # Checkout the repository
       - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # Build the Docker image
-      - name: Build Docker Image
-        run: make image VERSION=$VERSION
-
-  push:
-    name: Push Docker Image to Docker Hub
-    runs-on: ubuntu-latest
-    needs: [build, docker-build] # Ensure this job runs after "build" and "docker-build"
-
-    # Only run for "push" events and on the owner repository, not for "pull_request"
-    if: github.event_name == 'push' && github.repository_owner == 'r3kzi'
-
-    steps:
-      # Checkout the repository
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # Build the Docker image
-      - name: Build Docker Image
-        run: |
-          [[ "${{ github.ref_type }}" == "tag" ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,;s/^v//')
-
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-          make image VERSION=$VERSION IMAGE_EXTRA_ARGS='--label "runnumber=${GITHUB_RUN_ID}"'
+        uses: actions/checkout@v4
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
+        if: ${{ github.event_name == 'push' &&
+          github.ref == 'refs/heads/master' &&
+          github.repository_owner == 'r3kzi'
+          }}
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # Push the Docker image
-      - name: Push Docker Image
-        run: make push VERSION=$VERSION
+      # Set the Docker image version
+      - name: Set docker version
+        id: vars
+        run: |
+          [[ "${{ github.ref_type }}" == "tag" ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,;s/^v//')
+          echo "version=${VERSION:-latest}" >> $GITHUB_OUTPUT
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build grafana image and push to Github Container Registry
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' &&
+              github.ref == 'refs/heads/master' &&
+              github.repository_owner == 'r3kzi' }}
+          platforms: linux/arm/v7,linux/arm64/v8,linux/amd64
+          tags: |
+            rekzi/clamav-prometheus-exporter:${{ steps.vars.outputs.sha_short }}
+            rekzi/clamav-prometheus-exporter:${{ steps.vars.outputs.version }}
