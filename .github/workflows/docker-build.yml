@@ -1,5 +1,4 @@
 name: Build and Push Docker Image
-
 on:
   push:
     branches:
@@ -9,15 +8,12 @@ on:
   pull_request:
     branches:
       - master
-
 env:
   VERSION: latest
-
 jobs:
   build:
     name: Build Go Application
     runs-on: ubuntu-latest
-
     steps:
       # Checkout the repository
       - name: Checkout Code
@@ -34,7 +30,6 @@ jobs:
         run: |
           go mod tidy
           go build -o app .
-
   docker-build:
     name: Build and push Docker Image
     runs-on: ubuntu-latest
@@ -58,24 +53,23 @@ jobs:
 
       # Set the Docker image version
       - name: Set docker version
+        id: vars
         run: |
           [[ "${{ github.ref_type }}" == "tag" ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,;s/^v//')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=${VERSION:-latest}" >> $GITHUB_OUTPUT
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Build grafana image and push to Github Container Registry
         uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ github.event_name == 'push' &&
-            github.ref == 'refs/heads/master' &&
-            github.repository_owner == 'r3kzi'
-            }}
+              github.ref == 'refs/heads/master' &&
+              github.repository_owner == 'r3kzi' }}
           platforms: linux/arm/v7,linux/arm64/v8,linux/amd64
           tags: |
-            ${{ github.repository }}:${{ steps.vars.outputs.sha_short }}
-            ${{ github.repository }}:${{ steps.vars.outputs.version }}
-
+            rekzi/clamav-prometheus-exporter:${{ steps.vars.outputs.sha_short }}
+            rekzi/clamav-prometheus-exporter:${{ steps.vars.outputs.version }}
