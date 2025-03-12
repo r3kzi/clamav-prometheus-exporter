@@ -3,8 +3,10 @@ FROM golang:1.23-alpine as builder
 WORKDIR /go/src/github.com/rekzi/clamav-prometheus-exporter/
 COPY . .
 
+ARG VERSION
+
 RUN apk add --no-cache make
-RUN make build
+RUN make build VERSION=$VERSION
 
 # Final stage: the running container.
 # Use a minimal image for running the application
