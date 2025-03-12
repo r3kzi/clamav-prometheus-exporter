@@ -137,12 +137,12 @@ func (collector *Collector) CollectThreads(ch chan<- prometheus.Metric, stats st
 
 	// THREADS
 	if len(matches) > 0 {
-		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[1][1]))
-		log.Debug("threadsLive: ", float(matches[1][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[2][1]))
-		log.Debug("threadsIdle: ", float(matches[2][1]))
-		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[3][1]))
-		log.Debug("threadsMax: ", float(matches[3][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsLive, prometheus.GaugeValue, float(matches[0][1]))
+		log.Debug("threadsLive: ", float(matches[0][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsIdle, prometheus.GaugeValue, float(matches[1][1]))
+		log.Debug("threadsIdle: ", float(matches[1][1]))
+		ch <- prometheus.MustNewConstMetric(collector.threadsMax, prometheus.GaugeValue, float(matches[2][1]))
+		log.Debug("threadsMax: ", float(matches[2][1]))
 	}
 }
 
