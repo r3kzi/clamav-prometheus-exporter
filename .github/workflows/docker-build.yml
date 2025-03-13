@@ -50,7 +50,7 @@ jobs:
     needs: [build, docker-build] # Ensure this job runs after "build" and "docker-build"
 
     # Only run for "push" events and on the owner repository, not for "pull_request"
-    if: github.event_name == 'push' && github.repository_owner == 'rekzi'
+    if: github.event_name == 'push' && github.repository_owner == 'r3kzi'
 
     outputs:
       GITHUB_VERSION: ${{ env.VERSION }}
