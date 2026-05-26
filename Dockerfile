@@ -1,5 +1,5 @@
 # First stage: build the executable.
-FROM golang:1.25-alpine as builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /go/src/github.com/rekzi/clamav-prometheus-exporter/
 COPY . .
 
@@ -10,7 +10,7 @@ RUN make build VERSION=$VERSION
 
 # Final stage: the running container.
 # Use a minimal image for running the application
-FROM alpine:3.22 AS final
+FROM alpine:3.23 AS final
 
 # Install necessary certificates
 RUN apk add --no-cache ca-certificates
