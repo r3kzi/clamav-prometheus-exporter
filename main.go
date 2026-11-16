@@ -29,6 +29,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/clamav"
 	"github.com/r3kzi/clamav-prometheus-exporter/pkg/collector"
+	"github.com/r3kzi/clamav-prometheus-exporter/pkg/virusevent"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,6 +40,7 @@ var (
 	port    int
 	network string
 	logLevel string
+	virusEventListenAddress string
 )
 
 func setLogLevel(level string) {
@@ -69,6 +71,7 @@ func init() {
 	flag.IntVar(&port, "clamav-port", 3310, "ClamAV port to use")
 	flag.StringVar(&network, "network", "tcp", "Network mode to use, typically tcp or unix (socket)")
 	flag.StringVar(&logLevel, "log-level", "info", "Set the level of logging. (options: trace, debug, info, warn, error, fatal, panic)")
+	flag.StringVar(&virusEventListenAddress, "virus-event-listen-address", "", "Separate address to serve /virus-event on, e.g. 127.0.0.1:9811 (served on the metrics port if empty)")
 
 	flag.Parse()
 
@@ -87,8 +90,35 @@ func main() {
 	coll := collector.New(*client)
 	prometheus.MustRegister(coll)
 
+	virusEvents := virusevent.New()
+	prometheus.MustRegister(virusEvents)
+
 	router := http.NewServeMux()
 	router.Handle("/metrics", promhttp.Handler())
+
+	// The endpoint for VirusEvent is served next to /metrics, unless a separate
+	// listen address is set. A separate address makes it possible to restrict who
+	// can report detections (localhost only, or a NetworkPolicy on that port).
+	var virusEventServer *http.Server
+	if virusEventListenAddress == "" {
+		router.Handle(virusevent.Path, virusEvents)
+	} else {
+		virusEventRouter := http.NewServeMux()
+		virusEventRouter.Handle(virusevent.Path, virusEvents)
+		virusEventServer = &http.Server{
+			Addr:         virusEventListenAddress,
+			Handler:      virusEventRouter,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			IdleTimeout:  15 * time.Second,
+		}
+		go func() {
+			log.Info("Virus event endpoint is ready to handle requests at ", virusEventListenAddress)
+			if err := virusEventServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("Could not listen on %s: %v\n", virusEventListenAddress, err)
+			}
+		}()
+	}
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%v", 9810),
@@ -110,6 +140,12 @@ func main() {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
+
+		if virusEventServer != nil {
+			if err := virusEventServer.Shutdown(ctx); err != nil {
+				log.Errorf("Could not gracefully shutdown the virus event endpoint: %v", err)
+			}
+		}
 
 		if err := server.Shutdown(ctx); err != nil {
 			log.Fatalf("Could not gracefully shutdown the server: %v\n", err)
