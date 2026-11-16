@@ -21,6 +21,7 @@ Exports metrics from [ClamAV](https://www.clamav.net/) as Prometheus metrics.
 - ClamAVThreadsLive
 - ClamAVThreadsMax
 - ClamAVUp
+- ClamAVVirusesDetected (requires `VirusEvent` in `clamd.conf`, see [Counting detected viruses](#counting-detected-viruses))
 
 ```
 # HELP clamav_build_info Shows ClamAV Build Info
@@ -59,6 +60,9 @@ clamav_threads_max 10
 # HELP clamav_up Shows UP Status
 # TYPE clamav_up gauge
 clamav_up 1
+# HELP clamav_viruses_detected_total Shows the number of detected viruses reported by the VirusEvent directive of clamd
+# TYPE clamav_viruses_detected_total counter
+clamav_viruses_detected_total 0
 ```
 
 ## Installation
@@ -93,7 +97,67 @@ Usage of clamav-prometheus-exporter:
       Set the level of logging. (options: trace, debug, info, warn, error, fatal, panic) (default "info")
   -network string
       Network mode to use, typically tcp or unix (socket) (default "tcp")
+  -virus-event-listen-address string
+      Separate address to serve /virus-event on, e.g. 127.0.0.1:9811 (served on the metrics port if empty)
 ```
+
+## Counting detected viruses
+
+`clamd` does not expose the number of detected viruses through its socket commands. It can run a command
+for every detection though (`VirusEvent`). The exporter counts every `POST` request to `/virus-event`, so
+`clamd` has to send one per detection.
+
+```
+# HELP clamav_viruses_detected_total Shows the number of detected viruses reported by the VirusEvent directive of clamd
+# TYPE clamav_viruses_detected_total counter
+clamav_viruses_detected_total 2
+```
+
+### Required clamd configuration
+
+Add one `VirusEvent` line to `clamd.conf` and restart `clamd`.
+
+The command only has to send an empty `POST` request to the exporter. This line works with
+`curl`, `wget` (GNU or BusyBox) and, if neither is installed, with `bash` or `nc`:
+
+```
+VirusEvent if command -v curl >/dev/null; then curl -s -o /dev/null -m 2 -X POST http://127.0.0.1:9810/virus-event; elif command -v wget >/dev/null; then wget -q -O /dev/null -T 2 --post-data= http://127.0.0.1:9810/virus-event; else timeout 2 bash -c 'printf "POST /virus-event HTTP/1.0\r\n\r\n" >/dev/tcp/127.0.0.1/9810'; fi
+```
+
+It must stay on a single line. If you know which tool is available, you can use the matching short form
+instead (check with `command -v curl wget bash nc` in the environment of `clamd`):
+
+```
+# curl
+VirusEvent curl -s -o /dev/null -m 2 -X POST http://127.0.0.1:9810/virus-event
+
+# wget (GNU or BusyBox)
+VirusEvent wget -q -O /dev/null -T 2 --post-data= http://127.0.0.1:9810/virus-event
+
+# neither curl nor wget: bash writes the HTTP request to the TCP socket itself
+VirusEvent timeout 2 bash -c 'printf "POST /virus-event HTTP/1.0\r\n\r\n" >/dev/tcp/127.0.0.1/9810'
+
+# neither curl, wget nor bash: nc (netcat)
+VirusEvent printf 'POST /virus-event HTTP/1.0\r\n\r\n' | nc -w 2 127.0.0.1 9810 >/dev/null
+```
+
+- Replace `127.0.0.1` and `9810` with the address and port of the exporter as seen from `clamd`, in every
+  place of the line (the `bash` and `nc` forms take host and port separately). If the exporter runs with
+  `-virus-event-listen-address`, use that address and port instead of the metrics port.
+- `clamd` accepts only one `VirusEvent` directive. If you already use one, call both commands from a
+  wrapper script.
+- Keep the timeouts (`-m 2`, `-T 2`, `timeout 2`, `-w 2`), so that an unreachable exporter cannot hold up `clamd`.
+- The request needs no body. `clamd` provides the signature name and the file name to the command
+  (`%v`, `CLAM_VIRUSEVENT_VIRUSNAME`, `CLAM_VIRUSEVENT_FILENAME`), but the exporter does not use them.
+
+
+### Things to know
+
+- `VirusEvent` is a `clamd` feature. Scans with `clamscan` (without the daemon) are not counted.
+- The endpoint has no authentication. Everyone who can reach it can increment the counter (nothing else).
+  By default it is served on the metrics port. To restrict access, serve it on a separate address with
+  `-virus-event-listen-address`: use `127.0.0.1:9811` if `clamd` runs next to the exporter (same host or pod),
+  otherwise use e.g. `:9811` and only allow `clamd` to reach that port (firewall, Kubernetes NetworkPolicy).
 
 ## Prometheus config
 
